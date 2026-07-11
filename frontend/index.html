@@ -41,9 +41,8 @@
     
     /* ============ ANIMATIONS ============ */
     @keyframes pulse-ring {
-      0% { transform: scale(0.95); opacity: 0.7; }
+      0%, 100% { transform: scale(0.95); opacity: 0.7; }
       50% { transform: scale(1.05); opacity: 0.3; }
-      100% { transform: scale(0.95); opacity: 0.7; }
     }
     .pulse-ring { animation: pulse-ring 2s ease-in-out infinite; }
     
@@ -331,6 +330,25 @@
       border-color: #3b82f6;
       box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
     }
+    
+    /* ============ TOOLTIP ============ */
+    .tooltip {
+      position: relative;
+    }
+    .tooltip:hover::after {
+      content: attr(data-tip);
+      position: absolute;
+      bottom: 100%;
+      left: 50%;
+      transform: translateX(-50%);
+      padding: 4px 8px;
+      background: rgba(0,0,0,0.8);
+      color: white;
+      font-size: 11px;
+      border-radius: 4px;
+      white-space: nowrap;
+      margin-bottom: 4px;
+    }
   </style>
 </head>
 <body>
@@ -378,56 +396,1387 @@
     <source src="data:audio/wav;base64,U3RlcmVv" type="audio/wav">
   </audio>
 
-  <!-- ============ JAVASCRIPT ============ -->
-  <script src="app.js"></script>
-  
-  <!-- ============ INITIALIZATION ============ -->
+  <!-- ============ JAVASCRIPT - COMPLETE APP ============ -->
   <script>
-    // Global error handler
-    window.addEventListener('error', function(e) {
-      console.error('Global error:', e.message);
-      const container = document.getElementById('toast-container');
-      if (container) {
+    // ========================================================================
+    // J.A.R.V.I.S. AI ASSISTANT - COMPLETE APPLICATION
+    // ========================================================================
+    (function() {
+      'use strict';
+
+      // ============ STATE ============
+      const state = {
+        user: null,
+        token: localStorage.getItem('jarvis_token'),
+        currentPage: 'chat',
+        theme: 'dark',
+        messages: [],
+        isLoading: false,
+        isRecording: false,
+        voiceEnabled: true,
+        chats: [],
+        notes: [],
+        tasks: [],
+        reminders: [],
+        memories: [],
+        files: [],
+        weather: null,
+        date: new Date(),
+        input: '',
+        adminUsers: [],
+        adminStats: {},
+        toolResult: '',
+        toolLoading: false,
+        toolActive: 'chat',
+        sidebarOpen: true,
+        isMobile: window.innerWidth < 768,
+        isListening: false,
+        recognition: null,
+        unreadNotifications: 0,
+        isTyping: false,
+        notificationSound: null,
+        speechSynthesis: window.speechSynthesis,
+        currentUtterance: null
+      };
+
+      // ============ API ============
+      const API = {
+        base: 'http://localhost:5000/api',
+        
+        async request(endpoint, options = {}) {
+          const headers = {
+            'Content-Type': 'application/json',
+            ...options.headers
+          };
+          
+          if (state.token) {
+            headers['Authorization'] = `Bearer ${state.token}`;
+          }
+          
+          try {
+            const response = await fetch(`${this.base}${endpoint}`, {
+              ...options,
+              headers
+            });
+            
+            if (response.status === 401) {
+              localStorage.removeItem('jarvis_token');
+              state.token = null;
+              render();
+              showToast('Session expired. Please login again.', 'error');
+              throw new Error('Unauthorized');
+            }
+            
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.error || 'Request failed');
+            return data;
+          } catch (error) {
+            if (error.message === 'Unauthorized') throw error;
+            throw new Error(error.message || 'Network error');
+          }
+        },
+        
+        async get(endpoint) {
+          return this.request(endpoint, { method: 'GET' });
+        },
+        
+        async post(endpoint, body) {
+          return this.request(endpoint, {
+            method: 'POST',
+            body: JSON.stringify(body)
+          });
+        },
+        
+        async put(endpoint, body) {
+          return this.request(endpoint, {
+            method: 'PUT',
+            body: JSON.stringify(body)
+          });
+        },
+        
+        async delete(endpoint) {
+          return this.request(endpoint, { method: 'DELETE' });
+        },
+        
+        async upload(endpoint, file) {
+          const formData = new FormData();
+          formData.append('file', file);
+          
+          const response = await fetch(`${this.base}${endpoint}`, {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${state.token}`
+            },
+            body: formData
+          });
+          
+          return response.json();
+        }
+      };
+
+      // ============ RENDER ENGINE ============
+      function render() {
+        const root = document.getElementById('root');
+        
+        const overlay = document.getElementById('loading-overlay');
+        if (overlay) overlay.style.display = 'none';
+        
+        if (!state.token) {
+          root.innerHTML = renderAuth();
+          bindAuthEvents();
+          return;
+        }
+        
+        root.innerHTML = renderApp();
+        bindAppEvents();
+        
+        switch(state.currentPage) {
+          case 'chat': loadChats(); break;
+          case 'dashboard': loadDashboard(); break;
+          case 'notes': loadNotes(); break;
+          case 'tasks': loadTasks(); break;
+          case 'admin': loadAdmin(); break;
+        }
+        
+        updateClock();
+        
+        const chatInput = document.getElementById('chat-input');
+        if (chatInput && state.input) {
+          chatInput.value = state.input;
+        }
+      }
+
+      // ============ AUTH PAGE ============
+      function renderAuth() {
+        return `
+          <div id="auth-container" class="min-h-screen flex items-center justify-center p-4" style="
+            background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%);
+          ">
+            <div class="fixed inset-0 overflow-hidden pointer-events-none">
+              <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+              <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+              <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl"></div>
+            </div>
+            
+            <div class="glass rounded-2xl p-8 w-full max-w-md relative z-10 fade-in">
+              <div class="text-center mb-8">
+                <div class="text-6xl mb-3 float-slow">🤖</div>
+                <h1 class="text-4xl font-bold gradient-text">J.A.R.V.I.S.</h1>
+                <p class="text-gray-400 mt-2">Your AI Assistant</p>
+                <div class="flex justify-center gap-1 mt-3">
+                  <span class="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
+                  <span class="w-1.5 h-1.5 bg-purple-400 rounded-full"></span>
+                  <span class="w-1.5 h-1.5 bg-pink-400 rounded-full"></span>
+                </div>
+              </div>
+              
+              <form id="auth-form" class="space-y-4">
+                <div id="auth-fields" style="display: none;">
+                  <div class="relative">
+                    <i class="fa-regular fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                    <input type="text" id="auth-username" placeholder="Username" class="w-full pl-10 pr-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition" required />
+                  </div>
+                </div>
+                
+                <div class="relative">
+                  <i class="fa-regular fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                  <input type="email" id="auth-email" placeholder="Email" class="w-full pl-10 pr-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition" required />
+                </div>
+                
+                <div class="relative">
+                  <i class="fa-regular fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                  <input type="password" id="auth-password" placeholder="Password" class="w-full pl-10 pr-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition" required />
+                </div>
+                
+                <button type="submit" id="auth-submit" class="w-full py-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2">
+                  <i class="fa-solid fa-right-to-bracket"></i>
+                  <span>Sign In</span>
+                </button>
+              </form>
+              
+              <p class="text-center mt-4 text-gray-400">
+                <span id="auth-toggle-text">Don't have an account?</span>
+                <button id="auth-toggle" class="text-blue-400 hover:underline ml-2 transition">Sign Up</button>
+              </p>
+              
+              <div class="mt-6 flex justify-center gap-4 text-gray-600 text-xs">
+                <span>🔒 Secure</span>
+                <span>•</span>
+                <span>⚡ Fast</span>
+                <span>•</span>
+                <span>🤖 AI Powered</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      function bindAuthEvents() {
+        let isLogin = true;
+        
+        const toggleBtn = document.getElementById('auth-toggle');
+        const usernameField = document.getElementById('auth-fields');
+        const submitBtn = document.getElementById('auth-submit');
+        const toggleText = document.getElementById('auth-toggle-text');
+        
+        if (toggleBtn) {
+          toggleBtn.addEventListener('click', () => {
+            isLogin = !isLogin;
+            usernameField.style.display = isLogin ? 'none' : 'block';
+            submitBtn.innerHTML = isLogin 
+              ? '<i class="fa-solid fa-right-to-bracket"></i><span>Sign In</span>'
+              : '<i class="fa-solid fa-user-plus"></i><span>Create Account</span>';
+            toggleText.textContent = isLogin ? "Don't have an account?" : 'Already have an account?';
+            toggleBtn.textContent = isLogin ? 'Sign Up' : 'Sign In';
+          });
+        }
+        
+        const form = document.getElementById('auth-form');
+        if (form) {
+          form.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('auth-email').value;
+            const password = document.getElementById('auth-password').value;
+            const username = document.getElementById('auth-username').value;
+            
+            const submitBtn = document.getElementById('auth-submit');
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Loading...</span>';
+            
+            try {
+              const endpoint = isLogin ? '/auth/login' : '/auth/register';
+              const body = isLogin ? { email, password } : { username, email, password };
+              const data = await API.post(endpoint, body);
+              state.token = data.token;
+              state.user = data.user;
+              localStorage.setItem('jarvis_token', data.token);
+              render();
+              showToast(isLogin ? 'Welcome back! 👋' : 'Account created! 🎉', 'success');
+            } catch (error) {
+              showToast(error.message || 'Authentication failed', 'error');
+              submitBtn.disabled = false;
+              submitBtn.innerHTML = isLogin 
+                ? '<i class="fa-solid fa-right-to-bracket"></i><span>Sign In</span>'
+                : '<i class="fa-solid fa-user-plus"></i><span>Create Account</span>';
+            }
+          });
+        }
+      }
+
+      // ============ MAIN APP ============
+      function renderApp() {
+        return `
+          <div id="app-container" class="flex h-screen bg-[#0a0a0f]">
+            ${renderSidebar()}
+            <div id="main-content" class="flex-1 overflow-hidden relative">
+              <div class="glass px-6 py-3 flex items-center justify-between border-b border-white/5">
+                <div class="flex items-center gap-3">
+                  <button id="sidebar-toggle" class="md:hidden text-gray-400 hover:text-white transition">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                  </button>
+                  <h2 class="text-lg font-semibold text-white capitalize">${state.currentPage}</h2>
+                  <span class="text-xs text-gray-500 bg-white/5 px-2 py-0.5 rounded-full">v2.0</span>
+                </div>
+                <div class="flex items-center gap-3">
+                  <button id="notifications-btn" class="text-gray-400 hover:text-white transition relative">
+                    <i class="fa-regular fa-bell text-xl"></i>
+                    ${state.unreadNotifications > 0 ? `<span class="badge">${state.unreadNotifications}</span>` : ''}
+                  </button>
+                  <button id="user-menu-btn" class="flex items-center gap-2 text-gray-400 hover:text-white transition">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                      ${state.user?.username?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                    <span class="hidden sm:inline text-sm">${state.user?.username || 'User'}</span>
+                    <i class="fa-solid fa-chevron-down text-xs"></i>
+                  </button>
+                </div>
+              </div>
+              
+              <div id="page-content" class="h-[calc(100%-60px)] overflow-hidden">
+                ${state.currentPage === 'dashboard' ? renderDashboard() : ''}
+                ${state.currentPage === 'chat' ? renderChat() : ''}
+                ${state.currentPage === 'tools' ? renderTools() : ''}
+                ${state.currentPage === 'notes' ? renderNotes() : ''}
+                ${state.currentPage === 'tasks' ? renderTasks() : ''}
+                ${state.currentPage === 'settings' ? renderSettings() : ''}
+                ${state.currentPage === 'admin' ? renderAdmin() : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // ============ SIDEBAR ============
+      function renderSidebar() {
+        const pages = [
+          { id: 'dashboard', icon: 'fa-gauge-high', label: 'Dashboard' },
+          { id: 'chat', icon: 'fa-comment-dots', label: 'Chat' },
+          { id: 'tools', icon: 'fa-wand-magic-sparkles', label: 'Tools' },
+          { id: 'notes', icon: 'fa-note-sticky', label: 'Notes' },
+          { id: 'tasks', icon: 'fa-list-check', label: 'Tasks' },
+          { id: 'settings', icon: 'fa-gear', label: 'Settings' }
+        ];
+        
+        if (state.user?.isAdmin) {
+          pages.push({ id: 'admin', icon: 'fa-users-gear', label: 'Admin' });
+        }
+        
+        return `
+          <div class="sidebar glass-dark w-20 md:w-64 flex flex-col border-r border-white/5 transition-all duration-300">
+            <div class="p-4 text-center border-b border-white/5">
+              <div class="text-2xl md:text-3xl font-bold gradient-text">JARVIS</div>
+              <div class="text-xs text-gray-500 hidden md:block">v2.0</div>
+            </div>
+            
+            <nav class="flex-1 p-2 space-y-1 overflow-y-auto custom-scrollbar">
+              ${pages.map(p => `
+                <div class="sidebar-item ${state.currentPage === p.id ? 'active' : ''}" data-page="${p.id}">
+                  <i class="fa-solid ${p.icon} w-5 text-center"></i>
+                  <span class="sidebar-label hidden md:inline">${p.label}</span>
+                  ${p.id === 'chat' ? `<span class="ml-auto text-xs text-gray-500 hidden md:block">${state.chats.length}</span>` : ''}
+                </div>
+              `).join('')}
+            </nav>
+            
+            <div class="p-4 border-t border-white/5">
+              <div class="flex items-center gap-3 px-2 py-2">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                  ${state.user?.username?.charAt(0).toUpperCase() || 'U'}
+                </div>
+                <div class="hidden md:block flex-1">
+                  <div class="text-sm font-medium text-white">${state.user?.username || 'User'}</div>
+                  <div class="text-xs text-gray-500 truncate">${state.user?.email || ''}</div>
+                </div>
+                <div class="hidden md:block text-xs text-gray-500">
+                  ${state.user?.subscription === 'premium' ? '⭐' : '🆓'}
+                </div>
+              </div>
+              <button id="logout-btn" class="w-full mt-2 flex items-center gap-3 px-2 py-2 rounded-lg text-red-400 hover:bg-red-500/10 transition">
+                <i class="fa-solid fa-right-from-bracket w-5 text-center"></i>
+                <span class="hidden md:inline">Logout</span>
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      // ============ DASHBOARD ============
+      function renderDashboard() {
+        const hour = new Date().getHours();
+        const greeting = hour < 12 ? 'Morning' : hour < 18 ? 'Afternoon' : 'Evening';
+        
+        return `
+          <div id="dashboard-content" class="h-full overflow-y-auto p-6 custom-scrollbar">
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+              <div class="md:col-span-2 rounded-2xl p-8 relative overflow-hidden" style="
+                background: linear-gradient(135deg, #1a1a2e, #3b82f6);
+              ">
+                <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+                <div class="relative z-10">
+                  <h1 class="text-3xl font-bold text-white">Good ${greeting}, ${state.user?.username || 'User'}! 👋</h1>
+                  <p class="text-blue-200 mt-2">How can JARVIS assist you today?</p>
+                  <div class="flex gap-2 mt-4 flex-wrap">
+                    <span class="px-3 py-1 bg-white/10 rounded-full text-xs text-white">💬 ${state.chats.length} chats</span>
+                    <span class="px-3 py-1 bg-white/10 rounded-full text-xs text-white">📝 ${state.notes.length} notes</span>
+                    <span class="px-3 py-1 bg-white/10 rounded-full text-xs text-white">✅ ${state.tasks.filter(t => !t.completed).length} tasks</span>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="glass rounded-2xl p-6">
+                <div id="clock" class="text-3xl font-bold text-white font-mono">${state.date.toLocaleTimeString()}</div>
+                <div class="text-gray-400">${state.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
+                ${state.weather ? `
+                  <div class="mt-4 flex items-center gap-3">
+                    <img src="https://openweathermap.org/img/wn/${state.weather.icon}@2x.png" alt="weather" class="w-12 h-12" />
+                    <div>
+                      <div class="text-xl font-semibold text-white">${state.weather.temp}°C</div>
+                      <div class="text-gray-400 text-sm">${state.weather.description}</div>
+                    </div>
+                  </div>
+                ` : `
+                  <div class="mt-4 flex items-center gap-3">
+                    <div class="spinner w-8 h-8"></div>
+                    <div class="text-gray-500">Loading weather...</div>
+                  </div>
+                `}
+              </div>
+            </div>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
+              ${[
+                { icon: 'fa-comment-dots', label: 'Chats', value: state.chats.length, color: 'text-blue-400' },
+                { icon: 'fa-list-check', label: 'Tasks', value: state.tasks.filter(t => !t.completed).length, color: 'text-green-400' },
+                { icon: 'fa-note-sticky', label: 'Notes', value: state.notes.length, color: 'text-yellow-400' },
+                { icon: 'fa-bell', label: 'Reminders', value: state.reminders.length, color: 'text-purple-400' }
+              ].map(stat => `
+                <div class="glass rounded-xl p-4 hover:bg-white/5 transition">
+                  <i class="fa-solid ${stat.icon} ${stat.color} text-xl"></i>
+                  <div class="text-2xl font-bold text-white mt-2">${stat.value}</div>
+                  <div class="text-gray-400 text-sm">${stat.label}</div>
+                </div>
+              `).join('')}
+            </div>
+            
+            <div class="mt-6">
+              <h3 class="text-lg font-semibold text-white mb-3">Recent Chats</h3>
+              <div class="space-y-2">
+                ${state.chats.slice(0, 5).map(chat => `
+                  <div class="glass rounded-lg p-3 flex justify-between items-center hover:bg-white/5 transition cursor-pointer">
+                    <span class="text-white">${chat.title || 'New Chat'}</span>
+                    <span class="text-gray-500 text-sm">${new Date(chat.updatedAt).toLocaleDateString()}</span>
+                  </div>
+                `).join('')}
+                ${state.chats.length === 0 ? '<div class="text-gray-500 text-center py-8">No chats yet. Start a conversation!</div>' : ''}
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // ============ CHAT PAGE ============
+      function renderChat() {
+        return `
+          <div id="chat-container" class="h-full flex flex-col">
+            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+              ${state.messages.length === 0 ? `
+                <div class="h-full flex flex-col items-center justify-center text-center text-gray-500">
+                  <div class="text-6xl mb-4 float-slow">🤖</div>
+                  <h2 class="text-2xl font-bold text-white">Welcome to JARVIS</h2>
+                  <p class="mt-2">How can I help you today?</p>
+                  <div class="flex gap-2 mt-4 flex-wrap justify-center">
+                    <button class="quick-prompt px-3 py-1.5 glass rounded-full text-sm text-gray-300 hover:text-white hover:bg-white/10 transition">Write a poem</button>
+                    <button class="quick-prompt px-3 py-1.5 glass rounded-full text-sm text-gray-300 hover:text-white hover:bg-white/10 transition">Summarize this</button>
+                    <button class="quick-prompt px-3 py-1.5 glass rounded-full text-sm text-gray-300 hover:text-white hover:bg-white/10 transition">Generate code</button>
+                    <button class="quick-prompt px-3 py-1.5 glass rounded-full text-sm text-gray-300 hover:text-white hover:bg-white/10 transition">What's the weather?</button>
+                  </div>
+                </div>
+              ` : state.messages.map((msg, i) => `
+                <div class="flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} slide-in">
+                  <div class="max-w-[85%] ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'} p-4 ${msg.role === 'user' ? '' : 'text-white'}">
+                    ${msg.role === 'assistant' ? renderMarkdown(msg.content) : msg.content}
+                    <div class="text-xs ${msg.role === 'user' ? 'text-blue-200' : 'text-gray-500'} mt-2">
+                      ${new Date(msg.timestamp || Date.now()).toLocaleTimeString()}
+                    </div>
+                  </div>
+                </div>
+              `).join('')}
+              ${state.isLoading ? `
+                <div class="flex justify-start slide-in">
+                  <div class="chat-bubble-ai p-4">
+                    <div class="flex gap-2">
+                      <span class="typing-dot w-2 h-2 bg-blue-400 rounded-full"></span>
+                      <span class="typing-dot w-2 h-2 bg-blue-400 rounded-full"></span>
+                      <span class="typing-dot w-2 h-2 bg-blue-400 rounded-full"></span>
+                    </div>
+                  </div>
+                </div>
+              ` : ''}
+              <div id="chat-end"></div>
+            </div>
+            
+            <div class="p-4 border-t border-white/5 bg-[#0a0a0f]">
+              <div class="flex gap-2">
+                <button id="voice-toggle" class="p-3 rounded-lg ${state.voiceEnabled ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-500'} transition hover:bg-opacity-30" title="Toggle voice output">
+                  <i class="fa-solid ${state.voiceEnabled ? 'fa-microphone' : 'fa-microphone-slash'}"></i>
+                </button>
+                <button id="stop-btn" class="p-3 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition" title="Stop generation">
+                  <i class="fa-solid fa-stop"></i>
+                </button>
+                <button id="clear-chat-btn" class="p-3 rounded-lg bg-gray-700/50 text-gray-400 hover:text-white hover:bg-gray-700 transition" title="Clear chat">
+                  <i class="fa-regular fa-trash-can"></i>
+                </button>
+                <input id="chat-input" type="text" placeholder="Type your message..." class="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition input-focus" />
+                <button id="voice-rec-btn" class="p-3 rounded-lg bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 transition ${state.isRecording ? 'pulse-ring' : ''}" title="Voice input">
+                  <i class="fa-solid fa-waveform"></i>
+                </button>
+                <button id="send-btn" class="p-3 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition disabled:opacity-50" title="Send message (Enter)">
+                  <i class="fa-solid fa-paper-plane"></i>
+                </button>
+              </div>
+              <div class="flex justify-between mt-2 text-xs text-gray-500">
+                <span>Press <kbd class="px-1.5 py-0.5 bg-white/10 rounded">Enter</kbd> to send</span>
+                <span><kbd class="px-1.5 py-0.5 bg-white/10 rounded">Ctrl+K</kbd> to focus</span>
+              </div>
+            </div>
+          </div>
+        `;
+      }
+
+      // ============ TOOLS PAGE ============
+      function renderTools() {
+        const tools = [
+          { id: 'chat', icon: 'fa-comment', label: 'AI Chat', desc: 'Conversation' },
+          { id: 'code', icon: 'fa-code', label: 'Code Generator', desc: 'Generate code' },
+          { id: 'image', icon: 'fa-image', label: 'Image Generator', desc: 'Create images' },
+          { id: 'summarize', icon: 'fa-file-lines', label: 'Summarizer', desc: 'Summarize text' },
+          { id: 'translate', icon: 'fa-language', label: 'Translator', desc: 'Translate text' },
+          { id: 'grammar', icon: 'fa-spell-check', label: 'Grammar Fixer', desc: 'Fix grammar' },
+          { id: 'email', icon: 'fa-envelope', label: 'Email Writer', desc: 'Write emails' }
+        ];
+        
+        const activeTool = tools.find(t => t.id === state.toolActive) || tools[0];
+        
+        return `
+          <div id="tools-container" class="h-full flex">
+            <div class="w-48 border-r border-white/5 p-2 space-y-1 overflow-y-auto custom-scrollbar">
+              ${tools.map(t => `
+                <div class="sidebar-item ${state.toolActive === t.id ? 'active' : ''} flex-col items-start px-3 py-2" data-tool="${t.id}">
+                  <div class="flex items-center gap-2 w-full">
+                    <i class="fa-solid ${t.icon} w-4 text-center"></i>
+                    <span class="text-sm">${t.label}</span>
+                  </div>
+                  <span class="text-xs text-gray-500 ml-6">${t.desc}</span>
+                </div>
+              `).join('')}
+            </div>
+            
+            <div class="flex-1 p-6 overflow-y-auto custom-scrollbar">
+              <div class="flex items-center gap-3 mb-4">
+                <i class="fa-solid ${activeTool.icon} text-blue-400 text-xl"></i>
+                <h3 class="text-xl font-semibold text-white">${activeTool.label}</h3>
+                <span class="text-xs text-gray-500 bg-white/5 px-2 py-0.5 rounded-full">AI Tool</span>
+              </div>
+              
+              <textarea id="tool-input" class="w-full h-32 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition input-focus resize-none" placeholder="Enter your prompt..."></textarea>
+              
+              <div class="flex gap-3 mt-4">
+                <button id="tool-generate" class="px-6 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition disabled:opacity-50 flex items-center gap-2">
+                  ${state.toolLoading ? '<i class="fa-solid fa-spinner fa-spin"></i> Processing...' : '<i class="fa-solid fa-wand-magic-sparkles"></i> Generate'}
+                </button>
+                <button id="tool-clear" class="px-4 py-2 rounded-lg bg-gray-700 text-gray-400 hover:text-white hover:bg-gray-600 transition">
+                  <i class="fa-regular fa-trash-can"></i> Clear
+                </button>
+              </div>
+              
+              ${state.toolResult ? `
+                <div class="mt-6 p-4 rounded-lg glass fade-in">
+                  <div class="flex justify-between items-center mb-3">
+                    <span class="text-sm text-gray-400">Result</span>
+                    <button class="copy-btn px-3 py-1 rounded bg-white/10 text-white text-sm hover:bg-white/20 transition flex items-center gap-1">
+                      <i class="fa-regular fa-copy"></i> Copy
+                    </button>
+                  </div>
+                  <div class="text-white markdown max-h-96 overflow-y-auto custom-scrollbar">${renderMarkdown(state.toolResult)}</div>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      // ============ NOTES PAGE ============
+      function renderNotes() {
+        return `
+          <div id="notes-container" class="h-full overflow-y-auto p-6 custom-scrollbar">
+            <div class="flex justify-between items-center mb-6">
+              <div>
+                <h2 class="text-2xl font-bold text-white">📝 Notes</h2>
+                <p class="text-gray-400 text-sm">${state.notes.length} notes total</p>
+              </div>
+              <button id="add-note" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i> New Note
+              </button>
+            </div>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              ${state.notes.map(note => `
+                <div class="glass rounded-lg p-4 hover:bg-white/5 transition group">
+                  <div class="flex justify-between items-start">
+                    <h4 class="text-white font-semibold">${note.title}</h4>
+                    <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                      <button class="text-gray-400 hover:text-blue-400 transition edit-note" data-id="${note._id}">
+                        <i class="fa-regular fa-pen-to-square"></i>
+                      </button>
+                      <button class="text-gray-400 hover:text-red-400 transition delete-note" data-id="${note._id}">
+                        <i class="fa-regular fa-trash-can"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <p class="text-gray-400 text-sm mt-2 line-clamp-3">${note.content || 'No content'}</p>
+                  <div class="flex justify-between items-center mt-3">
+                    <div class="flex gap-1">
+                      ${(note.tags || []).map(tag => `<span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400">#${tag}</span>`).join('')}
+                    </div>
+                    <span class="text-gray-500 text-xs">${new Date(note.updatedAt || note.createdAt).toLocaleDateString()}</span>
+                  </div>
+                </div>
+              `).join('')}
+              ${state.notes.length === 0 ? `
+                <div class="col-span-full text-center py-12 text-gray-500">
+                  <div class="text-4xl mb-3">📝</div>
+                  <p>No notes yet. Create your first note!</p>
+                </div>
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      // ============ TASKS PAGE ============
+      function renderTasks() {
+        const pending = state.tasks.filter(t => !t.completed);
+        const completed = state.tasks.filter(t => t.completed);
+        
+        return `
+          <div id="tasks-container" class="h-full overflow-y-auto p-6 custom-scrollbar">
+            <div class="flex justify-between items-center mb-6">
+              <div>
+                <h2 class="text-2xl font-bold text-white">✅ Tasks</h2>
+                <p class="text-gray-400 text-sm">${pending.length} pending · ${completed.length} completed</p>
+              </div>
+              <button id="add-task" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition flex items-center gap-2">
+                <i class="fa-solid fa-plus"></i> New Task
+              </button>
+            </div>
+            
+            <div class="space-y-2">
+              <h4 class="text-sm text-gray-500 font-medium">Pending</h4>
+              ${pending.map(task => `
+                <div class="glass rounded-lg p-4 flex items-center gap-4 hover:bg-white/5 transition">
+                  <button class="toggle-task text-2xl" data-id="${task._id}">
+                    <i class="fa-regular fa-circle-check text-gray-500 hover:text-green-400 transition"></i>
+                  </button>
+                  <div class="flex-1">
+                    <div class="text-white">${task.title}</div>
+                    ${task.description ? `<div class="text-gray-400 text-sm">${task.description}</div>` : ''}
+                    <div class="flex gap-3 mt-1">
+                      ${task.dueDate ? `<span class="text-gray-500 text-xs">📅 ${new Date(task.dueDate).toLocaleDateString()}</span>` : ''}
+                      ${task.priority ? `<span class="text-xs px-2 py-0.5 rounded-full ${task.priority === 'high' ? 'bg-red-500/20 text-red-400' : task.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-green-500/20 text-green-400'}">${task.priority}</span>` : ''}
+                    </div>
+                  </div>
+                  <button class="text-gray-400 hover:text-red-400 transition delete-task" data-id="${task._id}">
+                    <i class="fa-regular fa-trash-can"></i>
+                  </button>
+                </div>
+              `).join('')}
+              ${pending.length === 0 ? '<div class="text-gray-500 text-center py-4">No pending tasks 🎉</div>' : ''}
+              
+              ${completed.length > 0 ? `
+                <h4 class="text-sm text-gray-500 font-medium mt-4">Completed</h4>
+                ${completed.map(task => `
+                  <div class="glass rounded-lg p-4 flex items-center gap-4 opacity-60 hover:opacity-100 transition">
+                    <button class="toggle-task text-2xl" data-id="${task._id}">
+                      <i class="fa-solid fa-circle-check text-green-400"></i>
+                    </button>
+                    <div class="flex-1">
+                      <div class="text-white line-through">${task.title}</div>
+                      ${task.description ? `<div class="text-gray-500 text-sm line-through">${task.description}</div>` : ''}
+                    </div>
+                    <button class="text-gray-400 hover:text-red-400 transition delete-task" data-id="${task._id}">
+                      <i class="fa-regular fa-trash-can"></i>
+                    </button>
+                  </div>
+                `).join('')}
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      // ============ SETTINGS PAGE ============
+      function renderSettings() {
+        return `
+          <div id="settings-container" class="h-full overflow-y-auto p-6 custom-scrollbar">
+            <h2 class="text-2xl font-bold text-white mb-6">⚙️ Settings</h2>
+            
+            <div class="max-w-2xl space-y-6">
+              <div class="glass rounded-lg p-4">
+                <h3 class="text-white font-semibold mb-3">Profile</h3>
+                <div class="flex items-center gap-4">
+                  <div class="w-16 h-16 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-2xl font-bold">
+                    ${state.user?.username?.charAt(0).toUpperCase() || 'U'}
+                  </div>
+                  <div>
+                    <div class="text-white font-medium">${state.user?.username}</div>
+                    <div class="text-gray-400 text-sm">${state.user?.email}</div>
+                    <div class="text-xs text-gray-500">${state.user?.subscription === 'premium' ? '⭐ Premium' : '🆓 Free'}</div>
+                  </div>
+                </div>
+              </div>
+              
+              <div class="glass rounded-lg p-4">
+                <h3 class="text-white font-semibold mb-2">Theme</h3>
+                <div class="flex gap-2">
+                  <button class="theme-btn px-4 py-2 rounded-lg ${state.theme === 'dark' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-gray-700 text-gray-400 border border-transparent'}" data-theme="dark">
+                    <i class="fa-solid fa-moon mr-2"></i>Dark
+                  </button>
+                  <button class="theme-btn px-4 py-2 rounded-lg ${state.theme === 'light' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-gray-700 text-gray-400 border border-transparent'}" data-theme="light">
+                    <i class="fa-solid fa-sun mr-2"></i>Light
+                  </button>
+                </div>
+              </div>
+              
+              <div class="glass rounded-lg p-4">
+                <h3 class="text-white font-semibold mb-2">Voice Settings</h3>
+                <div class="space-y-3">
+                  <div>
+                    <label class="text-gray-400 text-sm">Voice</label>
+                    <select id="voice-select" class="w-full mt-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-blue-500 focus:outline-none">
+                      <option value="alloy" ${state.user?.preferences?.voice === 'alloy' ? 'selected' : ''}>Alloy</option>
+                      <option value="echo" ${state.user?.preferences?.voice === 'echo' ? 'selected' : ''}>Echo</option>
+                      <option value="fable" ${state.user?.preferences?.voice === 'fable' ? 'selected' : ''}>Fable</option>
+                      <option value="onyx" ${state.user?.preferences?.voice === 'onyx' ? 'selected' : ''}>Onyx</option>
+                      <option value="nova" ${state.user?.preferences?.voice === 'nova' ? 'selected' : ''}>Nova</option>
+                      <option value="shimmer" ${state.user?.preferences?.voice === 'shimmer' ? 'selected' : ''}>Shimmer</option>
+                    </select>
+                  </div>
+                  <div>
+                    <label class="text-gray-400 text-sm">Wake Word</label>
+                    <input type="text" id="wake-word" value="${state.user?.preferences?.wakeWord || 'Jarvis'}" class="w-full mt-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-blue-500 focus:outline-none" />
+                  </div>
+                </div>
+              </div>
+              
+              <div class="glass rounded-lg p-4">
+                <h3 class="text-white font-semibold mb-2">Language</h3>
+                <select id="language-select" class="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-blue-500 focus:outline-none">
+                  <option value="en" ${state.user?.preferences?.language === 'en' ? 'selected' : ''}>English</option>
+                  <option value="es" ${state.user?.preferences?.language === 'es' ? 'selected' : ''}>Español</option>
+                  <option value="fr" ${state.user?.preferences?.language === 'fr' ? 'selected' : ''}>Français</option>
+                  <option value="de" ${state.user?.preferences?.language === 'de' ? 'selected' : ''}>Deutsch</option>
+                  <option value="zh" ${state.user?.preferences?.language === 'zh' ? 'selected' : ''}>中文</option>
+                  <option value="ja" ${state.user?.preferences?.language === 'ja' ? 'selected' : ''}>日本語</option>
+                </select>
+              </div>
+              
+              <button id="save-settings" class="px-6 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition flex items-center gap-2">
+                <i class="fa-regular fa-floppy-disk"></i> Save Settings
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      // ============ ADMIN PAGE ============
+      function renderAdmin() {
+        return `
+          <div id="admin-container" class="h-full overflow-y-auto p-6 custom-scrollbar">
+            <h2 class="text-2xl font-bold text-white mb-6">🛡️ Admin Dashboard</h2>
+            
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+              ${[
+                { label: 'Users', value: state.adminStats.totalUsers || 0, icon: 'fa-users', color: 'text-blue-400' },
+                { label: 'Chats', value: state.adminStats.totalChats || 0, icon: 'fa-comments', color: 'text-green-400' },
+                { label: 'Notes', value: state.adminStats.totalNotes || 0, icon: 'fa-note-sticky', color: 'text-yellow-400' },
+                { label: 'Tasks', value: state.adminStats.totalTasks || 0, icon: 'fa-list-check', color: 'text-purple-400' }
+              ].map(stat => `
+                <div class="glass rounded-lg p-4 text-center">
+                  <i class="fa-solid ${stat.icon} ${stat.color} text-2xl"></i>
+                  <div class="text-2xl font-bold text-white">${stat.value}</div>
+                  <div class="text-gray-400 text-sm">${stat.label}</div>
+                </div>
+              `).join('')}
+            </div>
+            
+            <div class="glass rounded-lg overflow-hidden">
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead class="bg-white/5">
+                    <tr>
+                      <th class="px-4 py-3 text-left text-gray-400 text-sm">User</th>
+                      <th class="px-4 py-3 text-left text-gray-400 text-sm">Email</th>
+                      <th class="px-4 py-3 text-left text-gray-400 text-sm">Subscription</th>
+                      <th class="px-4 py-3 text-left text-gray-400 text-sm">Chats</th>
+                      <th class="px-4 py-3 text-left text-gray-400 text-sm">Joined</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    ${state.adminUsers.map(user => `
+                      <tr class="border-t border-white/5 hover:bg-white/5 transition">
+                        <td class="px-4 py-3 text-white flex items-center gap-2">
+                          <div class="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
+                            ${user.username?.charAt(0).toUpperCase() || 'U'}
+                          </div>
+                          ${user.username}
+                        </td>
+                        <td class="px-4 py-3 text-gray-400 text-sm">${user.email}</td>
+                        <td class="px-4 py-3">
+                          <span class="px-2 py-1 rounded text-xs ${user.subscription === 'premium' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-gray-700 text-gray-400'}">${user.subscription || 'free'}</span>
+                        </td>
+                        <td class="px-4 py-3 text-gray-400">${user.usage?.chats || 0}</td>
+                        <td class="px-4 py-3 text-gray-400 text-sm">${new Date(user.createdAt).toLocaleDateString()}</td>
+                      </tr>
+                    `).join('')}
+                    ${state.adminUsers.length === 0 ? '<tr><td colspan="5" class="text-center text-gray-500 py-8">No users found</td></tr>' : ''}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+            
+            <div class="mt-4 flex gap-2">
+              <button id="admin-refresh" class="px-4 py-2 rounded-lg glass text-white hover:bg-white/10 transition flex items-center gap-2">
+                <i class="fa-solid fa-rotate"></i> Refresh
+              </button>
+            </div>
+          </div>
+        `;
+      }
+
+      // ============ TOAST ============
+      function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+        
+        const colors = {
+          success: 'border-green-500 text-green-400 bg-green-500/10',
+          error: 'border-red-500 text-red-400 bg-red-500/10',
+          info: 'border-blue-500 text-blue-400 bg-blue-500/10',
+          warning: 'border-yellow-500 text-yellow-400 bg-yellow-500/10'
+        };
+        
+        const icons = {
+          success: 'fa-circle-check',
+          error: 'fa-circle-xmark',
+          info: 'fa-circle-info',
+          warning: 'fa-triangle-exclamation'
+        };
+        
         const toast = document.createElement('div');
-        toast.className = 'glass px-4 py-2 rounded-lg border-l-4 border-red-500 text-red-400 text-sm toast pointer-events-auto';
-        toast.textContent = '⚠️ ' + e.message;
+        toast.className = `glass px-4 py-3 rounded-lg border-l-4 ${colors[type] || colors.info} toast pointer-events-auto flex items-center gap-3`;
+        toast.innerHTML = `
+          <i class="fa-solid ${icons[type] || icons.info}"></i>
+          <span>${message}</span>
+        `;
         container.appendChild(toast);
+        
         setTimeout(() => {
           toast.classList.add('toast-exit');
           setTimeout(() => toast.remove(), 300);
-        }, 4000);
+        }, 3000);
       }
-    });
-    
-    // Keyboard shortcuts
-    document.addEventListener('keydown', function(e) {
-      // Ctrl+K - Focus chat input
-      if (e.ctrlKey && e.key === 'k') {
-        e.preventDefault();
-        const input = document.getElementById('chat-input');
-        if (input) input.focus();
-      }
-      
-      // Escape - Close modals
-      if (e.key === 'Escape') {
-        document.getElementById('modal-container').style.display = 'none';
-        document.getElementById('context-menu').style.display = 'none';
-      }
-    });
-    
-    // Click outside context menu
-    document.addEventListener('click', function(e) {
-      const menu = document.getElementById('context-menu');
-      if (menu && !menu.contains(e.target)) {
-        menu.style.display = 'none';
-      }
-    });
-    
-    console.log('🤖 J.A.R.V.I.S. AI Assistant v2.0');
-    console.log('📡 Backend: http://localhost:5000');
-    console.log('🔌 WebSocket: ws://localhost:5000');
-    console.log('💡 Press Ctrl+K to focus chat');
-  </script>
 
+      // ============ MARKDOWN RENDERER ============
+      function renderMarkdown(text) {
+        if (!text) return '';
+        
+        let html = text;
+        
+        html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => {
+          return `<pre><code class="language-${lang || 'text'}">${escapeHtml(code.trim())}</code></pre>`;
+        });
+        
+        html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
+        html = html.replace(/^### (.*$)/gm, '<h3>$1</h3>');
+        html = html.replace(/^## (.*$)/gm, '<h2>$1</h2>');
+        html = html.replace(/^# (.*$)/gm, '<h1>$1</h1>');
+        html = html.replace(/\*\*([^*]+)\*\*/g, '<strong>$1</strong>');
+        html = html.replace(/\*([^*]+)\*/g, '<em>$1</em>');
+        html = html.replace(/^[\s]*[-*] (.*$)/gm, '<li>$1</li>');
+        html = html.replace(/(<li>.*<\/li>)/s, '<ul>$1</ul>');
+        html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="text-blue-400 hover:underline">$1</a>');
+        html = html.replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>');
+        html = html.replace(/\n/g, '<br />');
+        
+        return html;
+      }
+
+      function escapeHtml(text) {
+        const div = document.createElement('div');
+        div.textContent = text;
+        return div.innerHTML;
+      }
+
+      // ============ CHAT FUNCTIONS ============
+      async function sendChatMessage(text) {
+        if (!text.trim() || state.isLoading) return;
+
+        const userMessage = { role: 'user', content: text, timestamp: Date.now() };
+        state.messages.push(userMessage);
+        state.isLoading = true;
+        render();
+        
+        try {
+          const data = await API.post('/chat', {
+            messages: state.messages.map(m => ({ role: m.role, content: m.content })),
+            model: 'gpt-3.5-turbo'
+          });
+          
+          state.messages.push({ role: 'assistant', content: data.content, timestamp: Date.now() });
+          
+          if (state.voiceEnabled) {
+            speakText(data.content);
+          }
+          
+          await loadChats();
+        } catch (error) {
+          state.messages.push({ role: 'assistant', content: `Error: ${error.message}`, timestamp: Date.now() });
+          showToast('Failed to get response', 'error');
+        }
+        
+        state.isLoading = false;
+        render();
+        
+        const end = document.getElementById('chat-end');
+        if (end) end.scrollIntoView({ behavior: 'smooth' });
+      }
+
+      function speakText(text) {
+        if (!state.speechSynthesis) return;
+        
+        if (state.currentUtterance) {
+          state.speechSynthesis.cancel(state.currentUtterance);
+        }
+        
+        const utterance = new SpeechSynthesisUtterance(text);
+        utterance.rate = 0.9;
+        utterance.pitch = 1.1;
+        utterance.voice = state.speechSynthesis.getVoices().find(v => v.lang.includes('en')) || null;
+        
+        state.currentUtterance = utterance;
+        state.speechSynthesis.speak(utterance);
+      }
+
+      function startVoiceRecognition() {
+        if (!('webkitSpeechRecognition' in window)) {
+          showToast('Voice recognition not supported', 'error');
+          return;
+        }
+        
+        state.isRecording = true;
+        render();
+        
+        const recognition = new webkitSpeechRecognition();
+        recognition.lang = 'en-US';
+        recognition.continuous = false;
+        recognition.interimResults = true;
+        
+        recognition.onresult = (event) => {
+          let final = '';
+          for (let i = event.resultIndex; i < event.results.length; i++) {
+            if (event.results[i].isFinal) {
+              final += event.results[i][0].transcript;
+            }
+          }
+          if (final) {
+            const input = document.getElementById('chat-input');
+            if (input) {
+              input.value = final;
+              sendChatMessage(final);
+            }
+          }
+        };
+        
+        recognition.onend = () => {
+          state.isRecording = false;
+          render();
+        };
+        
+        recognition.onerror = () => {
+          state.isRecording = false;
+          render();
+          showToast('Voice recognition error', 'error');
+        };
+        
+        recognition.start();
+      }
+
+      // ============ DATA LOADERS ============
+      async function loadChats() {
+        try {
+          state.chats = await API.get('/chat/history');
+        } catch (error) {
+          state.chats = [];
+        }
+      }
+
+      async function loadNotes() {
+        try {
+          state.notes = await API.get('/notes');
+        } catch (error) {
+          state.notes = [];
+        }
+      }
+
+      async function loadTasks() {
+        try {
+          state.tasks = await API.get('/tasks');
+        } catch (error) {
+          state.tasks = [];
+        }
+      }
+
+      async function loadDashboard() {
+        try {
+          const weather = await API.get('/weather?city=London');
+          state.weather = weather;
+          await Promise.all([loadChats(), loadNotes(), loadTasks()]);
+          render();
+        } catch (error) {
+          // Silently fail
+        }
+      }
+
+      async function loadAdmin() {
+        try {
+          const [users, stats] = await Promise.all([
+            API.get('/admin/users'),
+            API.get('/admin/stats')
+          ]);
+          state.adminUsers = users;
+          state.adminStats = stats;
+          render();
+        } catch (error) {
+          showToast('Failed to load admin data', 'error');
+        }
+      }
+
+      // ============ CLOCK UPDATER ============
+      function updateClock() {
+        state.date = new Date();
+        const clock = document.getElementById('clock');
+        if (clock) {
+          clock.textContent = state.date.toLocaleTimeString();
+        }
+      }
+
+      // ============ EVENT BINDINGS ============
+      function bindAppEvents() {
+        // Sidebar navigation
+        document.querySelectorAll('.sidebar-item[data-page]').forEach(el => {
+          el.addEventListener('click', () => {
+            state.currentPage = el.dataset.page;
+            render();
+          });
+        });
+        
+        // Tool navigation
+        document.querySelectorAll('[data-tool]').forEach(el => {
+          el.addEventListener('click', () => {
+            state.toolActive = el.dataset.tool;
+            state.toolResult = '';
+            render();
+          });
+        });
+        
+        // Sidebar toggle
+        const sidebarToggle = document.getElementById('sidebar-toggle');
+        if (sidebarToggle) {
+          sidebarToggle.addEventListener('click', () => {
+            const sidebar = document.querySelector('.sidebar');
+            if (sidebar) {
+              sidebar.classList.toggle('w-20');
+              sidebar.classList.toggle('w-64');
+            }
+          });
+        }
+        
+        // Logout
+        const logoutBtn = document.getElementById('logout-btn');
+        if (logoutBtn) {
+          logoutBtn.addEventListener('click', () => {
+            if (confirm('Are you sure you want to logout?')) {
+              localStorage.removeItem('jarvis_token');
+              state.token = null;
+              render();
+              showToast('Logged out successfully', 'info');
+            }
+          });
+        }
+        
+        // Chat
+        const sendBtn = document.getElementById('send-btn');
+        const chatInput = document.getElementById('chat-input');
+        const stopBtn = document.getElementById('stop-btn');
+        const clearChatBtn = document.getElementById('clear-chat-btn');
+        
+        if (sendBtn && chatInput) {
+          const sendMessage = () => {
+            const text = chatInput.value.trim();
+            if (text && !state.isLoading) {
+              chatInput.value = '';
+              state.input = '';
+              sendChatMessage(text);
+            }
+          };
+          
+          sendBtn.addEventListener('click', sendMessage);
+          chatInput.addEventListener('keypress', (e) => {
+            if (e.key === 'Enter' && !e.shiftKey) {
+              e.preventDefault();
+              sendMessage();
+            }
+          });
+          chatInput.addEventListener('input', (e) => {
+            state.input = e.target.value;
+          });
+        }
+        
+        if (stopBtn) {
+          stopBtn.addEventListener('click', () => {
+            state.isLoading = false;
+            if (state.currentUtterance) {
+              state.speechSynthesis.cancel(state.currentUtterance);
+            }
+            render();
+            showToast('Generation stopped', 'warning');
+          });
+        }
+        
+        if (clearChatBtn) {
+          clearChatBtn.addEventListener('click', () => {
+            if (state.messages.length === 0) return;
+            if (confirm('Clear all messages?')) {
+              state.messages = [];
+              render();
+              showToast('Chat cleared', 'info');
+            }
+          });
+        }
+        
+        // Quick prompts
+        document.querySelectorAll('.quick-prompt').forEach(el => {
+          el.addEventListener('click', () => {
+            const text = el.textContent.trim();
+            const input = document.getElementById('chat-input');
+            if (input) {
+              input.value = text;
+              sendChatMessage(text);
+            }
+          });
+        });
+        
+        // Voice toggle
+        const voiceToggle = document.getElementById('voice-toggle');
+        if (voiceToggle) {
+          voiceToggle.addEventListener('click', () => {
+            state.voiceEnabled = !state.voiceEnabled;
+            if (!state.voiceEnabled && state.currentUtterance) {
+              state.speechSynthesis.cancel(state.currentUtterance);
+            }
+            render();
+            showToast(state.voiceEnabled ? 'Voice output enabled' : 'Voice output disabled', 'info');
+          });
+        }
+        
+        // Voice recognition
+        const voiceRecBtn = document.getElementById('voice-rec-btn');
+        if (voiceRecBtn) {
+          voiceRecBtn.addEventListener('click', startVoiceRecognition);
+        }
+        
+        // Tools
+        const toolGenerate = document.getElementById('tool-generate');
+        if (toolGenerate) {
+          toolGenerate.addEventListener('click', async () => {
+            const input = document.getElementById('tool-input');
+            if (!input) return;
+            
+            state.toolLoading = true;
+            state.toolResult = '';
+            render();
+            
+            try {
+              const endpoints = {
+                'code': '/tools/generate-code',
+                'image': '/tools/generate-image',
+                'summarize': '/tools/summarize',
+                'translate': '/tools/translate',
+                'grammar': '/tools/fix-grammar',
+                'email': '/tools/email-writer'
+              };
+              
+              const endpoint = endpoints[state.toolActive];
+              if (!endpoint) {
+                state.toolResult = 'This tool is not available yet.';
+                state.toolLoading = false;
+                render();
+                return;
+              }
+              
+              const data = await API.post(endpoint, { 
+                prompt: input.value,
+                targetLang: 'Spanish',
+                language: 'javascript',
+                text: input.value
+              });
+              
+              state.toolResult = data.code || data.url || data.summary || data.translated || data.fixed || data.email || 'Done!';
+            } catch (error) {
+              state.toolResult = `Error: ${error.message}`;
+            }
+            
+            state.toolLoading = false;
+            render();
+          });
+        }
+        
+        // Tool clear
+        const toolClear = document.getElementById('tool-clear');
+        if (toolClear) {
+          toolClear.addEventListener('click', () => {
+            const input = document.getElementById('tool-input');
+            if (input) input.value = '';
+            state.toolResult = '';
+            render();
+          });
+        }
+        
+        // Copy button
+        document.querySelectorAll('.copy-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            const text = btn.closest('.p-4')?.querySelector('.markdown')?.textContent || '';
+            if (navigator.clipboard) {
+              navigator.clipboard.writeText(text);
+              showToast('Copied to clipboard!', 'success');
+            }
+          });
+        });
+        
+        // Notes
+        const addNote = document.getElementById('add-note');
+        if (addNote) {
+          addNote.addEventListener('click', async () => {
+            const title = prompt('Note title:');
+            if (title) {
+              const content = prompt('Note content:');
+              try {
+                await API.post('/notes', { title, content });
+                await loadNotes();
+                render();
+                showToast('Note created!', 'success');
+              } catch (error) {
+                showToast('Failed to create note', 'error');
+              }
+            }
+          });
+        }
+        
+        document.querySelectorAll('.delete-note').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (confirm('Delete this note?')) {
+              await API.delete(`/notes/${btn.dataset.id}`);
+              await loadNotes();
+              render();
+            }
+          });
+        });
+        
+        // Tasks
+        const addTask = document.getElementById('add-task');
+        if (addTask) {
+          addTask.addEventListener('click', async () => {
+            const title = prompt('Task title:');
+            if (title) {
+              try {
+                await API.post('/tasks', { title, completed: false });
+                await loadTasks();
+                render();
+                showToast('Task added!', 'success');
+              } catch (error) {
+                showToast('Failed to add task', 'error');
+              }
+            }
+          });
+        }
+        
+        document.querySelectorAll('.toggle-task').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            const task = state.tasks.find(t => t._id === btn.dataset.id);
+            if (task) {
+              await API.put(`/tasks/${task._id}`, { ...task, completed: !task.completed });
+              await loadTasks();
+              render();
+            }
+          });
+        });
+        
+        document.querySelectorAll('.delete-task').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (confirm('Delete this task?')) {
+              await API.delete(`/tasks/${btn.dataset.id}`);
+              await loadTasks();
+              render();
+            }
+          });
+        });
+        
+        // Settings
+        const saveSettings = document.getElementById('save-settings');
+        if (saveSettings) {
+          saveSettings.addEventListener('click', async () => {
+            const voice = document.getElementById('voice-select')?.value || 'alloy';
+            const wakeWord = document.getElementById('wake-word')?.value || 'Jarvis';
+            const language = document.getElementById('language-select')?.value || 'en';
+            try {
+              await API.put('/user/profile', {
+                preferences: { ...state.user?.preferences, voice, wakeWord, language }
+              });
+              showToast('Settings saved!', 'success');
+            } catch (error) {
+              showToast('Failed to save settings', 'error');
+            }
+          });
+        }
+        
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.theme-btn').forEach(b => {
+              b.className = 'theme-btn px-4 py-2 rounded-lg bg-gray-700 text-gray-400 border border-transparent';
+            });
+            btn.className = 'theme-btn px-4 py-2 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30';
+            state.theme = btn.dataset.theme;
+            // Apply theme logic here (background colors, etc.)
+            showToast(`Theme changed to ${state.theme}`, 'info');
+          });
+        });
+        
+        // Admin refresh
+        const adminRefresh = document.getElementById('admin-refresh');
+        if (adminRefresh) {
+          adminRefresh.addEventListener('click', loadAdmin);
+        }
+        
+        // Notifications
+        const notificationsBtn = document.getElementById('notifications-btn');
+        if (notificationsBtn) {
+          notificationsBtn.addEventListener('click', () => {
+            state.unreadNotifications = 0;
+            render();
+            showToast('No new notifications', 'info');
+          });
+        }
+        
+        // User menu
+        const userMenuBtn = document.getElementById('user-menu-btn');
+        if (userMenuBtn) {
+          userMenuBtn.addEventListener('click', () => {
+            state.currentPage = 'settings';
+            render();
+          });
+        }
+      }
+
+      // ============ INIT ============
+      // Check for existing session
+      if (state.token) {
+        API.get('/user/profile')
+          .then(user => {
+            state.user = user;
+            render();
+            setInterval(updateClock, 1000);
+            loadChats();
+            loadDashboard();
+          })
+          .catch(() => {
+            state.token = null;
+            localStorage.removeItem('jarvis_token');
+            render();
+          });
+      } else {
+        render();
+      }
+
+      // Make API and state available globally for debugging
+      window.__JARVIS = { API, state, render, sendChatMessage, showToast };
+
+      console.log('🤖 J.A.R.V.I.S. AI Assistant v2.0');
+      console.log('📡 Backend: http://localhost:5000');
+      console.log('🔌 WebSocket: ws://localhost:5000');
+      console.log('💡 Press Ctrl+K to focus chat');
+      console.log('📊 Type window.__JARVIS for debugging');
+
+    })();
+  </script>
 </body>
-        </html>
+  </html>
