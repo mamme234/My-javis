@@ -3,108 +3,56 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>J.A.R.V.I.S. - AI Assistant</title>
-  
+  <title>J.A.R.V.I.S. - Premium AI Assistant</title>
+
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
-  
+
+  <!-- Three.js for 3D -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+
+  <!-- GSAP for animations -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
+
   <!-- Font Awesome -->
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
-  
+
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
-  
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
+
   <style>
     /* ============ RESET ============ */
-    * { 
-      margin: 0; 
-      padding: 0; 
-      box-sizing: border-box; 
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
     }
-    
-    body { 
-      font-family: 'Inter', sans-serif; 
+
+    body {
+      font-family: 'Inter', sans-serif;
       background: #0a0a0f;
       overflow: hidden;
       height: 100vh;
+      color: #fff;
     }
-    
+
     #root {
       height: 100vh;
       overflow: hidden;
     }
-    
+
     /* ============ SCROLLBAR ============ */
-    ::-webkit-scrollbar { width: 4px; }
-    ::-webkit-scrollbar-track { background: transparent; }
-    ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 2px; }
-    
-    /* ============ ANIMATIONS ============ */
-    @keyframes pulse-ring {
-      0%, 100% { transform: scale(0.95); opacity: 0.7; }
-      50% { transform: scale(1.05); opacity: 0.3; }
+    ::-webkit-scrollbar {
+      width: 4px;
     }
-    .pulse-ring { animation: pulse-ring 2s ease-in-out infinite; }
-    
-    @keyframes float {
-      0%, 100% { transform: translateY(0px); }
-      50% { transform: translateY(-10px); }
+    ::-webkit-scrollbar-track {
+      background: transparent;
     }
-    .float { animation: float 3s ease-in-out infinite; }
-    
-    @keyframes float-slow {
-      0%, 100% { transform: translateY(0px) rotate(0deg); }
-      50% { transform: translateY(-20px) rotate(5deg); }
+    ::-webkit-scrollbar-thumb {
+      background: #3b82f6;
+      border-radius: 2px;
     }
-    .float-slow { animation: float-slow 6s ease-in-out infinite; }
-    
-    @keyframes typing-dot {
-      0%, 60%, 100% { transform: translateY(0); }
-      30% { transform: translateY(-10px); }
-    }
-    .typing-dot { 
-      animation: typing-dot 1.4s infinite; 
-    }
-    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-    
-    @keyframes slide-in {
-      from { transform: translateX(100px); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-    .slide-in { animation: slide-in 0.3s ease-out; }
-    
-    @keyframes fade-in {
-      from { opacity: 0; transform: scale(0.95); }
-      to { opacity: 1; transform: scale(1); }
-    }
-    .fade-in { animation: fade-in 0.3s ease-out; }
-    
-    @keyframes shimmer {
-      0% { background-position: -200% 0; }
-      100% { background-position: 200% 0; }
-    }
-    .shimmer {
-      background: linear-gradient(90deg, transparent, rgba(255,255,255,0.05), transparent);
-      background-size: 200% 100%;
-      animation: shimmer 2s infinite;
-    }
-    
-    @keyframes glow-pulse {
-      0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
-      50% { box-shadow: 0 0 40px rgba(59, 130, 246, 0.6); }
-    }
-    .glow-pulse { animation: glow-pulse 2s ease-in-out infinite; }
-    
-    @keyframes wave {
-      0% { transform: scaleY(0.3); }
-      100% { transform: scaleY(1); }
-    }
-    
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
-    
+
     /* ============ GLASSMORPHISM ============ */
     .glass {
       background: rgba(255, 255, 255, 0.05);
@@ -112,21 +60,14 @@
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
-    
+
     .glass-dark {
       background: rgba(0, 0, 0, 0.5);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.05);
     }
-    
-    .glass-light {
-      background: rgba(255, 255, 255, 0.1);
-      backdrop-filter: blur(20px);
-      -webkit-backdrop-filter: blur(20px);
-      border: 1px solid rgba(255, 255, 255, 0.15);
-    }
-    
+
     /* ============ GRADIENT TEXT ============ */
     .gradient-text {
       background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
@@ -134,25 +75,29 @@
       -webkit-text-fill-color: transparent;
       background-clip: text;
     }
-    
+
+    .neon-glow {
+      text-shadow: 0 0 20px rgba(59, 130, 246, 0.5), 0 0 60px rgba(59, 130, 246, 0.2);
+    }
+
     /* ============ CHAT BUBBLES ============ */
     .chat-bubble-user {
       background: linear-gradient(135deg, #3b82f6, #6366f1);
       color: white;
       border-radius: 20px 20px 4px 20px;
-      box-shadow: 0 4px 15px rgba(59, 130, 246, 0.3);
+      box-shadow: 0 4px 30px rgba(59, 130, 246, 0.3);
     }
-    
+
     .chat-bubble-ai {
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 20px 20px 20px 4px;
       backdrop-filter: blur(10px);
     }
-    
+
     /* ============ SIDEBAR ============ */
     .sidebar-item {
-      transition: all 0.2s ease;
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
       border-radius: 12px;
       padding: 10px 14px;
       display: flex;
@@ -161,18 +106,19 @@
       cursor: pointer;
       color: #9ca3af;
       position: relative;
+      overflow: hidden;
     }
-    
+
     .sidebar-item:hover {
       background: rgba(255, 255, 255, 0.06);
       color: white;
     }
-    
+
     .sidebar-item.active {
       background: rgba(59, 130, 246, 0.15);
       color: #3b82f6;
     }
-    
+
     .sidebar-item.active::before {
       content: '';
       position: absolute;
@@ -184,7 +130,113 @@
       background: #3b82f6;
       border-radius: 0 3px 3px 0;
     }
-    
+
+    /* ============ JARVIS ORB ============ */
+    #three-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
+      pointer-events: none;
+    }
+
+    /* ============ VOICE WAVEFORM ============ */
+    .waveform-container {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 3px;
+      height: 60px;
+    }
+
+    .waveform-bar {
+      width: 4px;
+      background: linear-gradient(180deg, #3b82f6, #8b5cf6);
+      border-radius: 2px;
+      transition: height 0.1s;
+    }
+
+    /* ============ ANIMATIONS ============ */
+    @keyframes float {
+      0%,
+      100% {
+        transform: translateY(0px);
+      }
+      50% {
+        transform: translateY(-10px);
+      }
+    }
+    .float {
+      animation: float 3s ease-in-out infinite;
+    }
+
+    @keyframes pulse-ring {
+      0% {
+        transform: scale(0.95);
+        opacity: 0.7;
+      }
+      50% {
+        transform: scale(1.05);
+        opacity: 0.3;
+      }
+      100% {
+        transform: scale(0.95);
+        opacity: 0.7;
+      }
+    }
+    .pulse-ring {
+      animation: pulse-ring 2s ease-in-out infinite;
+    }
+
+    @keyframes glow-pulse {
+      0%,
+      100% {
+        box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
+      }
+      50% {
+        box-shadow: 0 0 60px rgba(59, 130, 246, 0.6);
+      }
+    }
+    .glow-pulse {
+      animation: glow-pulse 2s ease-in-out infinite;
+    }
+
+    @keyframes typing-dot {
+      0%,
+      60%,
+      100% {
+        transform: translateY(0);
+      }
+      30% {
+        transform: translateY(-10px);
+      }
+    }
+    .typing-dot {
+      animation: typing-dot 1.4s infinite;
+    }
+    .typing-dot:nth-child(2) {
+      animation-delay: 0.2s;
+    }
+    .typing-dot:nth-child(3) {
+      animation-delay: 0.4s;
+    }
+
+    @keyframes slide-in {
+      from {
+        transform: translateX(100px);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    .slide-in {
+      animation: slide-in 0.3s ease-out;
+    }
+
     /* ============ MARKDOWN ============ */
     .markdown pre {
       background: rgba(0, 0, 0, 0.4);
@@ -192,122 +244,82 @@
       border-radius: 8px;
       overflow-x: auto;
       margin: 0.5rem 0;
-      border: 1px solid rgba(255,255,255,0.05);
+      border: 1px solid rgba(255, 255, 255, 0.05);
     }
-    
     .markdown code {
       color: #f472b6;
       font-size: 0.9em;
     }
-    
-    .markdown h1, .markdown h2, .markdown h3 {
+    .markdown h1,
+    .markdown h2,
+    .markdown h3 {
       font-weight: 600;
       margin: 0.75rem 0 0.5rem 0;
     }
-    
-    .markdown ul, .markdown ol {
+    .markdown ul,
+    .markdown ol {
       padding-left: 1.5rem;
       margin: 0.5rem 0;
     }
-    
     .markdown li {
       margin: 0.25rem 0;
     }
-    
     .markdown blockquote {
       border-left: 3px solid #3b82f6;
       padding-left: 1rem;
       color: #9ca3af;
       margin: 0.5rem 0;
     }
-    
-    .markdown a {
-      color: #3b82f6;
-      text-decoration: underline;
-    }
-    
-    /* ============ VOICE WAVEFORM ============ */
-    .waveform {
-      display: flex;
-      align-items: center;
-      justify-content: center;
-      gap: 3px;
-      height: 40px;
-    }
-    
-    .waveform-bar {
-      width: 3px;
-      background: #3b82f6;
-      border-radius: 2px;
-      animation: wave 0.8s ease-in-out infinite alternate;
-    }
-    
-    .waveform-bar:nth-child(1) { height: 10px; animation-delay: 0s; }
-    .waveform-bar:nth-child(2) { height: 20px; animation-delay: 0.1s; }
-    .waveform-bar:nth-child(3) { height: 30px; animation-delay: 0.2s; }
-    .waveform-bar:nth-child(4) { height: 25px; animation-delay: 0.3s; }
-    .waveform-bar:nth-child(5) { height: 15px; animation-delay: 0.4s; }
-    .waveform-bar:nth-child(6) { height: 35px; animation-delay: 0.5s; }
-    .waveform-bar:nth-child(7) { height: 20px; animation-delay: 0.6s; }
-    .waveform-bar:nth-child(8) { height: 10px; animation-delay: 0.7s; }
-    
+
     /* ============ RESPONSIVE ============ */
     @media (max-width: 768px) {
-      .sidebar { width: 64px; }
-      .sidebar-label { display: none !important; }
-      .mobile-hide { display: none !important; }
-      .mobile-full { width: 100% !important; }
+      .sidebar {
+        width: 64px;
+      }
+      .sidebar-label {
+        display: none !important;
+      }
+      .mobile-hide {
+        display: none !important;
+      }
     }
-    
+
     @media (max-width: 480px) {
-      .text-3xl { font-size: 1.5rem; }
-      .p-6 { padding: 1rem; }
-      .gap-4 { gap: 0.75rem; }
+      .text-3xl {
+        font-size: 1.5rem;
+      }
+      .p-6 {
+        padding: 1rem;
+      }
     }
-    
-    /* ============ LOADING SPINNER ============ */
+
+    /* ============ LOADING ============ */
     .spinner {
-      width: 24px;
-      height: 24px;
-      border: 3px solid rgba(255,255,255,0.1);
+      width: 40px;
+      height: 40px;
+      border: 3px solid rgba(255, 255, 255, 0.1);
       border-top: 3px solid #3b82f6;
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
-    
+    @keyframes spin {
+      to {
+        transform: rotate(360deg);
+      }
+    }
+
     /* ============ TOAST ============ */
     .toast {
       transition: all 0.3s ease;
       transform: translateX(0);
       pointer-events: auto;
     }
-    
     .toast-exit {
       opacity: 0;
       transform: translateX(100px);
     }
-    
-    /* ============ LINE CLAMP ============ */
-    .line-clamp-3 {
-      display: -webkit-box;
-      -webkit-line-clamp: 3;
-      -webkit-box-orient: vertical;
-      overflow: hidden;
-    }
-    
-    /* ============ SCROLLBAR STYLING ============ */
-    .custom-scrollbar::-webkit-scrollbar {
-      width: 4px;
-    }
-    .custom-scrollbar::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    .custom-scrollbar::-webkit-scrollbar-thumb {
-      background: #3b82f6;
-      border-radius: 2px;
-    }
-    
-    /* ============ NOTIFICATION BADGE ============ */
+
+    /* ============ BADGE ============ */
     .badge {
       position: absolute;
       top: -4px;
@@ -323,83 +335,173 @@
       color: white;
       font-weight: 600;
     }
-    
-    /* ============ INPUT FOCUS ============ */
-    .input-focus:focus {
-      outline: none;
-      border-color: #3b82f6;
-      box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.2);
-    }
-    
-    /* ============ TOOLTIP ============ */
-    .tooltip {
-      position: relative;
-    }
-    .tooltip:hover::after {
-      content: attr(data-tip);
-      position: absolute;
-      bottom: 100%;
-      left: 50%;
-      transform: translateX(-50%);
-      padding: 4px 8px;
-      background: rgba(0,0,0,0.8);
-      color: white;
-      font-size: 11px;
-      border-radius: 4px;
-      white-space: nowrap;
-      margin-bottom: 4px;
-    }
   </style>
 </head>
 <body>
 
-  <!-- ============ ROOT CONTAINER ============ -->
+  <!-- ============ 3D CONTAINER ============ -->
+  <div id="three-container"></div>
+
+  <!-- ============ ROOT ============ -->
   <div id="root"></div>
 
-  <!-- ============ TOAST CONTAINER ============ -->
+  <!-- ============ TOAST ============ -->
   <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2 pointer-events-none"></div>
 
+  <!-- ============ MODAL ============ -->
+  <div id="modal-container" class="fixed inset-0 z-40 flex items-center justify-center bg-black/60 backdrop-blur-sm" style="display: none;">
+    <div class="glass rounded-2xl p-6 max-w-md w-full mx-4 fade-in">
+      <div id="modal-content"></div>
+    </div>
+  </div>
+
   <!-- ============ LOADING OVERLAY ============ -->
-  <div id="loading-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-[#0a0a0f] transition-opacity duration-500" style="display: none;">
+  <div id="loading-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-[#0a0a0f]" style="display: none;">
     <div class="text-center">
       <div class="text-6xl mb-4 float">🤖</div>
       <div class="spinner mx-auto"></div>
-      <p class="text-gray-400 mt-4">Loading J.A.R.V.I.S...</p>
+      <p class="text-gray-400 mt-4">Initializing J.A.R.V.I.S...</p>
     </div>
   </div>
 
-  <!-- ============ MODAL CONTAINER ============ -->
-  <div id="modal-container" class="fixed inset-0 z-40 flex items-center justify-center bg-black/50 backdrop-blur-sm" style="display: none;">
-    <div class="glass rounded-2xl p-6 max-w-md w-full mx-4 fade-in">
-      <div id="modal-content">
-        <!-- Modal content will be injected here -->
-      </div>
-    </div>
-  </div>
-
-  <!-- ============ CONTEXT MENU ============ -->
-  <div id="context-menu" class="fixed z-50 glass rounded-lg py-1 min-w-[160px] shadow-xl" style="display: none;">
-    <div class="px-3 py-2 text-xs text-gray-500 border-b border-white/5">JARVIS</div>
-    <div class="context-item px-3 py-2 hover:bg-white/5 cursor-pointer text-sm text-white flex items-center gap-2">
-      <i class="fa-regular fa-copy"></i> Copy
-    </div>
-    <div class="context-item px-3 py-2 hover:bg-white/5 cursor-pointer text-sm text-white flex items-center gap-2">
-      <i class="fa-regular fa-comment"></i> Reply
-    </div>
-    <div class="context-item px-3 py-2 hover:bg-red-500/10 cursor-pointer text-sm text-red-400 flex items-center gap-2">
-      <i class="fa-regular fa-trash-can"></i> Delete
-    </div>
-  </div>
-
-  <!-- ============ NOTIFICATION SOUND ============ -->
-  <audio id="notification-sound" preload="auto">
-    <source src="data:audio/wav;base64,U3RlcmVv" type="audio/wav">
-  </audio>
-
-  <!-- ============ JAVASCRIPT - COMPLETE APP ============ -->
+  <!-- ============ COMPLETE JAVASCRIPT ============ -->
   <script>
     // ========================================================================
-    // J.A.R.V.I.S. AI ASSISTANT - COMPLETE APPLICATION
+    // 1. THREE.JS - 3D ANIMATED ORB
+    // ========================================================================
+    (function initThree() {
+      const container = document.getElementById('three-container');
+
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      const renderer = new THREE.WebGLRenderer({
+        antialias: true,
+        alpha: true
+      });
+      renderer.setSize(window.innerWidth, window.innerHeight);
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+      renderer.setClearColor(0x0a0a0f, 0);
+      container.appendChild(renderer.domElement);
+
+      // Particles
+      const particlesGeometry = new THREE.BufferGeometry();
+      const particlesCount = 2000;
+      const posArray = new Float32Array(particlesCount * 3);
+      for (let i = 0; i < particlesCount * 3; i++) {
+        posArray[i] = (Math.random() - 0.5) * 10;
+      }
+      particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
+      const particlesMaterial = new THREE.PointsMaterial({
+        size: 0.02,
+        color: 0x3b82f6,
+        transparent: true,
+        opacity: 0.8,
+        blending: THREE.AdditiveBlending
+      });
+      const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+      scene.add(particles);
+
+      // Main Orb
+      const orbGeometry = new THREE.SphereGeometry(0.8, 64, 64);
+      const orbMaterial = new THREE.MeshPhongMaterial({
+        color: 0x3b82f6,
+        emissive: 0x1a3a8a,
+        emissiveIntensity: 0.5,
+        shininess: 100,
+        transparent: true,
+        opacity: 0.9
+      });
+      const orb = new THREE.Mesh(orbGeometry, orbMaterial);
+      scene.add(orb);
+
+      // Orb glow ring
+      const ringGeometry = new THREE.TorusGeometry(1, 0.02, 16, 100);
+      const ringMaterial = new THREE.MeshBasicMaterial({
+        color: 0x8b5cf6,
+        transparent: true,
+        opacity: 0.6
+      });
+      const ring = new THREE.Mesh(ringGeometry, ringMaterial);
+      ring.rotation.x = Math.PI / 2;
+      scene.add(ring);
+
+      // Orb glow ring 2
+      const ring2Geometry = new THREE.TorusGeometry(1.2, 0.01, 16, 100);
+      const ring2Material = new THREE.MeshBasicMaterial({
+        color: 0xec4899,
+        transparent: true,
+        opacity: 0.4
+      });
+      const ring2 = new THREE.Mesh(ring2Geometry, ring2Material);
+      ring2.rotation.z = Math.PI / 3;
+      scene.add(ring2);
+
+      // Lights
+      const ambientLight = new THREE.AmbientLight(0x404060);
+      scene.add(ambientLight);
+
+      const light1 = new THREE.PointLight(0x3b82f6, 2, 5);
+      light1.position.set(2, 1, 2);
+      scene.add(light1);
+
+      const light2 = new THREE.PointLight(0x8b5cf6, 1, 5);
+      light2.position.set(-2, -1, 2);
+      scene.add(light2);
+
+      const light3 = new THREE.PointLight(0xec4899, 1, 5);
+      light3.position.set(0, 2, -2);
+      scene.add(light3);
+
+      camera.position.z = 3;
+
+      let mouseX = 0;
+      let mouseY = 0;
+
+      document.addEventListener('mousemove', (e) => {
+        mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+        mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+      });
+
+      function animate() {
+        requestAnimationFrame(animate);
+
+        // Rotate particles
+        particles.rotation.y += 0.0005;
+
+        // Orb animation
+        orb.rotation.x += 0.005;
+        orb.rotation.y += 0.01;
+
+        // Ring animations
+        ring.rotation.x += 0.01;
+        ring.rotation.z += 0.005;
+        ring2.rotation.x += 0.005;
+        ring2.rotation.y += 0.01;
+
+        // Follow mouse
+        orb.position.x += (mouseX * 0.3 - orb.position.x) * 0.05;
+        orb.position.y += (-mouseY * 0.3 - orb.position.y) * 0.05;
+        ring.position.copy(orb.position);
+        ring2.position.copy(orb.position);
+
+        // Pulse
+        const scale = 1 + Math.sin(Date.now() * 0.002) * 0.03;
+        orb.scale.set(scale, scale, scale);
+
+        renderer.render(scene, camera);
+      }
+
+      animate();
+
+      window.addEventListener('resize', () => {
+        camera.aspect = window.innerWidth / window.innerHeight;
+        camera.updateProjectionMatrix();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+      });
+    })();
+
+    // ========================================================================
+    // 2. MAIN APPLICATION
     // ========================================================================
     (function() {
       'use strict';
@@ -418,7 +520,6 @@
         notes: [],
         tasks: [],
         reminders: [],
-        memories: [],
         files: [],
         weather: null,
         date: new Date(),
@@ -433,32 +534,34 @@
         isListening: false,
         recognition: null,
         unreadNotifications: 0,
-        isTyping: false,
-        notificationSound: null,
+        currentUtterance: null,
         speechSynthesis: window.speechSynthesis,
-        currentUtterance: null
+        socket: null,
+        aiModels: ['gpt-3.5-turbo', 'gpt-4', 'gemini-pro', 'claude', 'deepseek']
       };
 
       // ============ API ============
       const API = {
-        base: 'http://localhost:5000/api',
-        
+        base: window.location.hostname === 'localhost' ?
+          'http://localhost:10000/api' :
+          'https://your-backend.onrender.com/api',
+
         async request(endpoint, options = {}) {
           const headers = {
             'Content-Type': 'application/json',
             ...options.headers
           };
-          
+
           if (state.token) {
             headers['Authorization'] = `Bearer ${state.token}`;
           }
-          
+
           try {
             const response = await fetch(`${this.base}${endpoint}`, {
               ...options,
               headers
             });
-            
+
             if (response.status === 401) {
               localStorage.removeItem('jarvis_token');
               state.token = null;
@@ -466,7 +569,7 @@
               showToast('Session expired. Please login again.', 'error');
               throw new Error('Unauthorized');
             }
-            
+
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'Request failed');
             return data;
@@ -475,33 +578,33 @@
             throw new Error(error.message || 'Network error');
           }
         },
-        
+
         async get(endpoint) {
           return this.request(endpoint, { method: 'GET' });
         },
-        
+
         async post(endpoint, body) {
           return this.request(endpoint, {
             method: 'POST',
             body: JSON.stringify(body)
           });
         },
-        
+
         async put(endpoint, body) {
           return this.request(endpoint, {
             method: 'PUT',
             body: JSON.stringify(body)
           });
         },
-        
+
         async delete(endpoint) {
           return this.request(endpoint, { method: 'DELETE' });
         },
-        
+
         async upload(endpoint, file) {
           const formData = new FormData();
           formData.append('file', file);
-          
+
           const response = await fetch(`${this.base}${endpoint}`, {
             method: 'POST',
             headers: {
@@ -509,37 +612,27 @@
             },
             body: formData
           });
-          
+
           return response.json();
         }
       };
 
-      // ============ RENDER ENGINE ============
+      // ============ RENDER ============
       function render() {
         const root = document.getElementById('root');
-        
         const overlay = document.getElementById('loading-overlay');
         if (overlay) overlay.style.display = 'none';
-        
+
         if (!state.token) {
           root.innerHTML = renderAuth();
           bindAuthEvents();
           return;
         }
-        
+
         root.innerHTML = renderApp();
         bindAppEvents();
-        
-        switch(state.currentPage) {
-          case 'chat': loadChats(); break;
-          case 'dashboard': loadDashboard(); break;
-          case 'notes': loadNotes(); break;
-          case 'tasks': loadTasks(); break;
-          case 'admin': loadAdmin(); break;
-        }
-        
-        updateClock();
-        
+        loadData();
+
         const chatInput = document.getElementById('chat-input');
         if (chatInput && state.input) {
           chatInput.value = state.input;
@@ -549,63 +642,36 @@
       // ============ AUTH PAGE ============
       function renderAuth() {
         return `
-          <div id="auth-container" class="min-h-screen flex items-center justify-center p-4" style="
+          <div class="min-h-screen flex items-center justify-center p-4 relative" style="
             background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%);
           ">
-            <div class="fixed inset-0 overflow-hidden pointer-events-none">
-              <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
-              <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
-              <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl"></div>
-            </div>
-            
             <div class="glass rounded-2xl p-8 w-full max-w-md relative z-10 fade-in">
               <div class="text-center mb-8">
-                <div class="text-6xl mb-3 float-slow">🤖</div>
-                <h1 class="text-4xl font-bold gradient-text">J.A.R.V.I.S.</h1>
-                <p class="text-gray-400 mt-2">Your AI Assistant</p>
-                <div class="flex justify-center gap-1 mt-3">
-                  <span class="w-1.5 h-1.5 bg-blue-400 rounded-full"></span>
-                  <span class="w-1.5 h-1.5 bg-purple-400 rounded-full"></span>
-                  <span class="w-1.5 h-1.5 bg-pink-400 rounded-full"></span>
-                </div>
+                <div class="text-6xl mb-3 float">🤖</div>
+                <h1 class="text-4xl font-bold gradient-text neon-glow">J.A.R.V.I.S.</h1>
+                <p class="text-gray-400 mt-2">Premium AI Assistant</p>
               </div>
-              
+
               <form id="auth-form" class="space-y-4">
                 <div id="auth-fields" style="display: none;">
-                  <div class="relative">
-                    <i class="fa-regular fa-user absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
-                    <input type="text" id="auth-username" placeholder="Username" class="w-full pl-10 pr-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition" required />
-                  </div>
+                  <input type="text" id="auth-username" placeholder="Username"
+                    class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition" />
                 </div>
-                
-                <div class="relative">
-                  <i class="fa-regular fa-envelope absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
-                  <input type="email" id="auth-email" placeholder="Email" class="w-full pl-10 pr-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition" required />
-                </div>
-                
-                <div class="relative">
-                  <i class="fa-regular fa-lock absolute left-3 top-1/2 -translate-y-1/2 text-gray-500"></i>
-                  <input type="password" id="auth-password" placeholder="Password" class="w-full pl-10 pr-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition" required />
-                </div>
-                
-                <button type="submit" id="auth-submit" class="w-full py-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold hover:opacity-90 transition disabled:opacity-50 flex items-center justify-center gap-2">
+                <input type="email" id="auth-email" placeholder="Email"
+                  class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition" />
+                <input type="password" id="auth-password" placeholder="Password"
+                  class="w-full px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition" />
+                <button type="submit" id="auth-submit"
+                  class="w-full py-3 rounded-lg bg-gradient-to-r from-blue-500 to-purple-600 text-white font-semibold hover:opacity-90 transition flex items-center justify-center gap-2">
                   <i class="fa-solid fa-right-to-bracket"></i>
                   <span>Sign In</span>
                 </button>
               </form>
-              
+
               <p class="text-center mt-4 text-gray-400">
                 <span id="auth-toggle-text">Don't have an account?</span>
-                <button id="auth-toggle" class="text-blue-400 hover:underline ml-2 transition">Sign Up</button>
+                <button id="auth-toggle" class="text-blue-400 hover:underline ml-2">Sign Up</button>
               </p>
-              
-              <div class="mt-6 flex justify-center gap-4 text-gray-600 text-xs">
-                <span>🔒 Secure</span>
-                <span>•</span>
-                <span>⚡ Fast</span>
-                <span>•</span>
-                <span>🤖 AI Powered</span>
-              </div>
             </div>
           </div>
         `;
@@ -613,91 +679,79 @@
 
       function bindAuthEvents() {
         let isLogin = true;
-        
-        const toggleBtn = document.getElementById('auth-toggle');
-        const usernameField = document.getElementById('auth-fields');
-        const submitBtn = document.getElementById('auth-submit');
-        const toggleText = document.getElementById('auth-toggle-text');
-        
-        if (toggleBtn) {
-          toggleBtn.addEventListener('click', () => {
-            isLogin = !isLogin;
-            usernameField.style.display = isLogin ? 'none' : 'block';
-            submitBtn.innerHTML = isLogin 
-              ? '<i class="fa-solid fa-right-to-bracket"></i><span>Sign In</span>'
-              : '<i class="fa-solid fa-user-plus"></i><span>Create Account</span>';
-            toggleText.textContent = isLogin ? "Don't have an account?" : 'Already have an account?';
-            toggleBtn.textContent = isLogin ? 'Sign Up' : 'Sign In';
-          });
-        }
-        
-        const form = document.getElementById('auth-form');
-        if (form) {
-          form.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('auth-email').value;
-            const password = document.getElementById('auth-password').value;
-            const username = document.getElementById('auth-username').value;
-            
-            const submitBtn = document.getElementById('auth-submit');
-            submitBtn.disabled = true;
-            submitBtn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Loading...</span>';
-            
-            try {
-              const endpoint = isLogin ? '/auth/login' : '/auth/register';
-              const body = isLogin ? { email, password } : { username, email, password };
-              const data = await API.post(endpoint, body);
-              state.token = data.token;
-              state.user = data.user;
-              localStorage.setItem('jarvis_token', data.token);
-              render();
-              showToast(isLogin ? 'Welcome back! 👋' : 'Account created! 🎉', 'success');
-            } catch (error) {
-              showToast(error.message || 'Authentication failed', 'error');
-              submitBtn.disabled = false;
-              submitBtn.innerHTML = isLogin 
-                ? '<i class="fa-solid fa-right-to-bracket"></i><span>Sign In</span>'
-                : '<i class="fa-solid fa-user-plus"></i><span>Create Account</span>';
-            }
-          });
-        }
+
+        document.getElementById('auth-toggle')?.addEventListener('click', () => {
+          isLogin = !isLogin;
+          document.getElementById('auth-fields').style.display = isLogin ? 'none' : 'block';
+          document.getElementById('auth-submit').innerHTML = isLogin ?
+            '<i class="fa-solid fa-right-to-bracket"></i><span>Sign In</span>' :
+            '<i class="fa-solid fa-user-plus"></i><span>Create Account</span>';
+          document.getElementById('auth-toggle-text').textContent = isLogin ? "Don't have an account?" :
+            'Already have an account?';
+          document.getElementById('auth-toggle').textContent = isLogin ? 'Sign Up' : 'Sign In';
+        });
+
+        document.getElementById('auth-form')?.addEventListener('submit', async (e) => {
+          e.preventDefault();
+          const email = document.getElementById('auth-email').value;
+          const password = document.getElementById('auth-password').value;
+          const username = document.getElementById('auth-username').value;
+
+          const btn = document.getElementById('auth-submit');
+          btn.disabled = true;
+          btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Loading...</span>';
+
+          try {
+            const endpoint = isLogin ? '/auth/login' : '/auth/register';
+            const body = isLogin ? { email, password } : { username, email, password };
+            const data = await API.post(endpoint, body);
+            state.token = data.token;
+            state.user = data.user;
+            localStorage.setItem('jarvis_token', data.token);
+            render();
+            showToast(isLogin ? 'Welcome back! 👋' : 'Account created! 🎉', 'success');
+            initSocket();
+          } catch (error) {
+            showToast(error.message || 'Authentication failed', 'error');
+            btn.disabled = false;
+            btn.innerHTML = isLogin ?
+              '<i class="fa-solid fa-right-to-bracket"></i><span>Sign In</span>' :
+              '<i class="fa-solid fa-user-plus"></i><span>Create Account</span>';
+          }
+        });
       }
 
       // ============ MAIN APP ============
       function renderApp() {
         return `
-          <div id="app-container" class="flex h-screen bg-[#0a0a0f]">
+          <div class="flex h-screen relative z-10">
             ${renderSidebar()}
-            <div id="main-content" class="flex-1 overflow-hidden relative">
+            <div class="flex-1 overflow-hidden">
               <div class="glass px-6 py-3 flex items-center justify-between border-b border-white/5">
                 <div class="flex items-center gap-3">
                   <button id="sidebar-toggle" class="md:hidden text-gray-400 hover:text-white transition">
                     <i class="fa-solid fa-bars text-xl"></i>
                   </button>
                   <h2 class="text-lg font-semibold text-white capitalize">${state.currentPage}</h2>
-                  <span class="text-xs text-gray-500 bg-white/5 px-2 py-0.5 rounded-full">v2.0</span>
+                  <span class="text-xs text-gray-500 bg-white/5 px-2 py-0.5 rounded-full">Premium</span>
                 </div>
                 <div class="flex items-center gap-3">
                   <button id="notifications-btn" class="text-gray-400 hover:text-white transition relative">
                     <i class="fa-regular fa-bell text-xl"></i>
                     ${state.unreadNotifications > 0 ? `<span class="badge">${state.unreadNotifications}</span>` : ''}
                   </button>
-                  <button id="user-menu-btn" class="flex items-center gap-2 text-gray-400 hover:text-white transition">
-                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
-                      ${state.user?.username?.charAt(0).toUpperCase() || 'U'}
-                    </div>
-                    <span class="hidden sm:inline text-sm">${state.user?.username || 'User'}</span>
-                    <i class="fa-solid fa-chevron-down text-xs"></i>
-                  </button>
+                  <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                    ${state.user?.username?.charAt(0).toUpperCase() || 'U'}
+                  </div>
                 </div>
               </div>
-              
-              <div id="page-content" class="h-[calc(100%-60px)] overflow-hidden">
+              <div class="h-[calc(100%-60px)] overflow-hidden">
                 ${state.currentPage === 'dashboard' ? renderDashboard() : ''}
                 ${state.currentPage === 'chat' ? renderChat() : ''}
                 ${state.currentPage === 'tools' ? renderTools() : ''}
                 ${state.currentPage === 'notes' ? renderNotes() : ''}
                 ${state.currentPage === 'tasks' ? renderTasks() : ''}
+                ${state.currentPage === 'files' ? renderFiles() : ''}
                 ${state.currentPage === 'settings' ? renderSettings() : ''}
                 ${state.currentPage === 'admin' ? renderAdmin() : ''}
               </div>
@@ -714,44 +768,32 @@
           { id: 'tools', icon: 'fa-wand-magic-sparkles', label: 'Tools' },
           { id: 'notes', icon: 'fa-note-sticky', label: 'Notes' },
           { id: 'tasks', icon: 'fa-list-check', label: 'Tasks' },
+          { id: 'files', icon: 'fa-folder', label: 'Files' },
           { id: 'settings', icon: 'fa-gear', label: 'Settings' }
         ];
-        
+
         if (state.user?.isAdmin) {
           pages.push({ id: 'admin', icon: 'fa-users-gear', label: 'Admin' });
         }
-        
+
         return `
           <div class="sidebar glass-dark w-20 md:w-64 flex flex-col border-r border-white/5 transition-all duration-300">
             <div class="p-4 text-center border-b border-white/5">
-              <div class="text-2xl md:text-3xl font-bold gradient-text">JARVIS</div>
-              <div class="text-xs text-gray-500 hidden md:block">v2.0</div>
+              <div class="text-2xl md:text-3xl font-bold gradient-text neon-glow">JARVIS</div>
+              <div class="text-xs text-gray-500 hidden md:block">Premium v2.0</div>
             </div>
-            
-            <nav class="flex-1 p-2 space-y-1 overflow-y-auto custom-scrollbar">
+
+            <nav class="flex-1 p-2 space-y-1 overflow-y-auto">
               ${pages.map(p => `
                 <div class="sidebar-item ${state.currentPage === p.id ? 'active' : ''}" data-page="${p.id}">
                   <i class="fa-solid ${p.icon} w-5 text-center"></i>
                   <span class="sidebar-label hidden md:inline">${p.label}</span>
-                  ${p.id === 'chat' ? `<span class="ml-auto text-xs text-gray-500 hidden md:block">${state.chats.length}</span>` : ''}
                 </div>
               `).join('')}
             </nav>
-            
+
             <div class="p-4 border-t border-white/5">
-              <div class="flex items-center gap-3 px-2 py-2">
-                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
-                  ${state.user?.username?.charAt(0).toUpperCase() || 'U'}
-                </div>
-                <div class="hidden md:block flex-1">
-                  <div class="text-sm font-medium text-white">${state.user?.username || 'User'}</div>
-                  <div class="text-xs text-gray-500 truncate">${state.user?.email || ''}</div>
-                </div>
-                <div class="hidden md:block text-xs text-gray-500">
-                  ${state.user?.subscription === 'premium' ? '⭐' : '🆓'}
-                </div>
-              </div>
-              <button id="logout-btn" class="w-full mt-2 flex items-center gap-3 px-2 py-2 rounded-lg text-red-400 hover:bg-red-500/10 transition">
+              <button id="logout-btn" class="w-full flex items-center gap-3 px-2 py-2 rounded-lg text-red-400 hover:bg-red-500/10 transition">
                 <i class="fa-solid fa-right-from-bracket w-5 text-center"></i>
                 <span class="hidden md:inline">Logout</span>
               </button>
@@ -764,9 +806,9 @@
       function renderDashboard() {
         const hour = new Date().getHours();
         const greeting = hour < 12 ? 'Morning' : hour < 18 ? 'Afternoon' : 'Evening';
-        
+
         return `
-          <div id="dashboard-content" class="h-full overflow-y-auto p-6 custom-scrollbar">
+          <div class="h-full overflow-y-auto p-6 custom-scrollbar">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
               <div class="md:col-span-2 rounded-2xl p-8 relative overflow-hidden" style="
                 background: linear-gradient(135deg, #1a1a2e, #3b82f6);
@@ -779,10 +821,11 @@
                     <span class="px-3 py-1 bg-white/10 rounded-full text-xs text-white">💬 ${state.chats.length} chats</span>
                     <span class="px-3 py-1 bg-white/10 rounded-full text-xs text-white">📝 ${state.notes.length} notes</span>
                     <span class="px-3 py-1 bg-white/10 rounded-full text-xs text-white">✅ ${state.tasks.filter(t => !t.completed).length} tasks</span>
+                    <span class="px-3 py-1 bg-white/10 rounded-full text-xs text-white">📁 ${state.files.length} files</span>
                   </div>
                 </div>
               </div>
-              
+
               <div class="glass rounded-2xl p-6">
                 <div id="clock" class="text-3xl font-bold text-white font-mono">${state.date.toLocaleTimeString()}</div>
                 <div class="text-gray-400">${state.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
@@ -802,7 +845,7 @@
                 `}
               </div>
             </div>
-            
+
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
               ${[
                 { icon: 'fa-comment-dots', label: 'Chats', value: state.chats.length, color: 'text-blue-400' },
@@ -817,7 +860,7 @@
                 </div>
               `).join('')}
             </div>
-            
+
             <div class="mt-6">
               <h3 class="text-lg font-semibold text-white mb-3">Recent Chats</h3>
               <div class="space-y-2">
@@ -827,24 +870,24 @@
                     <span class="text-gray-500 text-sm">${new Date(chat.updatedAt).toLocaleDateString()}</span>
                   </div>
                 `).join('')}
-                ${state.chats.length === 0 ? '<div class="text-gray-500 text-center py-8">No chats yet. Start a conversation!</div>' : ''}
+                ${state.chats.length === 0 ? '<div class="text-gray-500 text-center py-8">No chats yet</div>' : ''}
               </div>
             </div>
           </div>
         `;
       }
 
-      // ============ CHAT PAGE ============
+      // ============ CHAT ============
       function renderChat() {
         return `
-          <div id="chat-container" class="h-full flex flex-col">
-            <div id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar">
+          <div class="h-full flex flex-col">
+            <div class="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar" id="chat-messages">
               ${state.messages.length === 0 ? `
                 <div class="h-full flex flex-col items-center justify-center text-center text-gray-500">
-                  <div class="text-6xl mb-4 float-slow">🤖</div>
-                  <h2 class="text-2xl font-bold text-white">Welcome to JARVIS</h2>
+                  <div class="text-6xl mb-4 float">🤖</div>
+                  <h2 class="text-2xl font-bold text-white">J.A.R.V.I.S. is ready</h2>
                   <p class="mt-2">How can I help you today?</p>
-                  <div class="flex gap-2 mt-4 flex-wrap justify-center">
+                  <div class="flex flex-wrap gap-2 mt-4 justify-center">
                     <button class="quick-prompt px-3 py-1.5 glass rounded-full text-sm text-gray-300 hover:text-white hover:bg-white/10 transition">Write a poem</button>
                     <button class="quick-prompt px-3 py-1.5 glass rounded-full text-sm text-gray-300 hover:text-white hover:bg-white/10 transition">Summarize this</button>
                     <button class="quick-prompt px-3 py-1.5 glass rounded-full text-sm text-gray-300 hover:text-white hover:bg-white/10 transition">Generate code</button>
@@ -853,7 +896,7 @@
                 </div>
               ` : state.messages.map((msg, i) => `
                 <div class="flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} slide-in">
-                  <div class="max-w-[85%] ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'} p-4 ${msg.role === 'user' ? '' : 'text-white'}">
+                  <div class="max-w-[85%] ${msg.role === 'user' ? 'chat-bubble-user' : 'chat-bubble-ai'} p-4">
                     ${msg.role === 'assistant' ? renderMarkdown(msg.content) : msg.content}
                     <div class="text-xs ${msg.role === 'user' ? 'text-blue-200' : 'text-gray-500'} mt-2">
                       ${new Date(msg.timestamp || Date.now()).toLocaleTimeString()}
@@ -874,23 +917,27 @@
               ` : ''}
               <div id="chat-end"></div>
             </div>
-            
+
             <div class="p-4 border-t border-white/5 bg-[#0a0a0f]">
-              <div class="flex gap-2">
-                <button id="voice-toggle" class="p-3 rounded-lg ${state.voiceEnabled ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-500'} transition hover:bg-opacity-30" title="Toggle voice output">
+              <div class="flex gap-2 flex-wrap">
+                <button id="voice-toggle" class="p-3 rounded-lg ${state.voiceEnabled ? 'bg-green-500/20 text-green-400' : 'bg-gray-700 text-gray-500'} transition">
                   <i class="fa-solid ${state.voiceEnabled ? 'fa-microphone' : 'fa-microphone-slash'}"></i>
                 </button>
-                <button id="stop-btn" class="p-3 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition" title="Stop generation">
+                <button id="stop-btn" class="p-3 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition">
                   <i class="fa-solid fa-stop"></i>
                 </button>
-                <button id="clear-chat-btn" class="p-3 rounded-lg bg-gray-700/50 text-gray-400 hover:text-white hover:bg-gray-700 transition" title="Clear chat">
+                <button id="clear-chat" class="p-3 rounded-lg bg-gray-700/50 text-gray-400 hover:text-white hover:bg-gray-700 transition">
                   <i class="fa-regular fa-trash-can"></i>
                 </button>
-                <input id="chat-input" type="text" placeholder="Type your message..." class="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition input-focus" />
-                <button id="voice-rec-btn" class="p-3 rounded-lg bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 transition ${state.isRecording ? 'pulse-ring' : ''}" title="Voice input">
+                <select id="model-select" class="px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-blue-500 focus:outline-none text-sm">
+                  ${state.aiModels.map(m => `<option value="${m}" ${state.user?.preferences?.aiModel === m ? 'selected' : ''}>${m}</option>`).join('')}
+                </select>
+                <input id="chat-input" type="text" placeholder="Type your message..."
+                  class="flex-1 min-w-[150px] px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition" />
+                <button id="voice-rec-btn" class="p-3 rounded-lg bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 transition ${state.isRecording ? 'pulse-ring' : ''}">
                   <i class="fa-solid fa-waveform"></i>
                 </button>
-                <button id="send-btn" class="p-3 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition disabled:opacity-50" title="Send message (Enter)">
+                <button id="send-btn" class="p-3 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition disabled:opacity-50">
                   <i class="fa-solid fa-paper-plane"></i>
                 </button>
               </div>
@@ -903,7 +950,7 @@
         `;
       }
 
-      // ============ TOOLS PAGE ============
+      // ============ TOOLS ============
       function renderTools() {
         const tools = [
           { id: 'chat', icon: 'fa-comment', label: 'AI Chat', desc: 'Conversation' },
@@ -912,14 +959,15 @@
           { id: 'summarize', icon: 'fa-file-lines', label: 'Summarizer', desc: 'Summarize text' },
           { id: 'translate', icon: 'fa-language', label: 'Translator', desc: 'Translate text' },
           { id: 'grammar', icon: 'fa-spell-check', label: 'Grammar Fixer', desc: 'Fix grammar' },
-          { id: 'email', icon: 'fa-envelope', label: 'Email Writer', desc: 'Write emails' }
+          { id: 'email', icon: 'fa-envelope', label: 'Email Writer', desc: 'Write emails' },
+          { id: 'search', icon: 'fa-search', label: 'Web Search', desc: 'Search the web' }
         ];
-        
-        const activeTool = tools.find(t => t.id === state.toolActive) || tools[0];
-        
+
+        const active = tools.find(t => t.id === state.toolActive) || tools[0];
+
         return `
-          <div id="tools-container" class="h-full flex">
-            <div class="w-48 border-r border-white/5 p-2 space-y-1 overflow-y-auto custom-scrollbar">
+          <div class="h-full flex">
+            <div class="w-48 border-r border-white/5 p-2 space-y-1 overflow-y-auto">
               ${tools.map(t => `
                 <div class="sidebar-item ${state.toolActive === t.id ? 'active' : ''} flex-col items-start px-3 py-2" data-tool="${t.id}">
                   <div class="flex items-center gap-2 w-full">
@@ -930,16 +978,16 @@
                 </div>
               `).join('')}
             </div>
-            
-            <div class="flex-1 p-6 overflow-y-auto custom-scrollbar">
+
+            <div class="flex-1 p-6 overflow-y-auto">
               <div class="flex items-center gap-3 mb-4">
-                <i class="fa-solid ${activeTool.icon} text-blue-400 text-xl"></i>
-                <h3 class="text-xl font-semibold text-white">${activeTool.label}</h3>
-                <span class="text-xs text-gray-500 bg-white/5 px-2 py-0.5 rounded-full">AI Tool</span>
+                <i class="fa-solid ${active.icon} text-blue-400 text-xl"></i>
+                <h3 class="text-xl font-semibold text-white">${active.label}</h3>
               </div>
-              
-              <textarea id="tool-input" class="w-full h-32 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition input-focus resize-none" placeholder="Enter your prompt..."></textarea>
-              
+
+              <textarea id="tool-input" class="w-full h-32 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none resize-none"
+                placeholder="Enter your prompt..."></textarea>
+
               <div class="flex gap-3 mt-4">
                 <button id="tool-generate" class="px-6 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition disabled:opacity-50 flex items-center gap-2">
                   ${state.toolLoading ? '<i class="fa-solid fa-spinner fa-spin"></i> Processing...' : '<i class="fa-solid fa-wand-magic-sparkles"></i> Generate'}
@@ -948,7 +996,7 @@
                   <i class="fa-regular fa-trash-can"></i> Clear
                 </button>
               </div>
-              
+
               ${state.toolResult ? `
                 <div class="mt-6 p-4 rounded-lg glass fade-in">
                   <div class="flex justify-between items-center mb-3">
@@ -957,7 +1005,7 @@
                       <i class="fa-regular fa-copy"></i> Copy
                     </button>
                   </div>
-                  <div class="text-white markdown max-h-96 overflow-y-auto custom-scrollbar">${renderMarkdown(state.toolResult)}</div>
+                  <div class="text-white markdown max-h-96 overflow-y-auto">${renderMarkdown(state.toolResult)}</div>
                 </div>
               ` : ''}
             </div>
@@ -965,71 +1013,50 @@
         `;
       }
 
-      // ============ NOTES PAGE ============
+      // ============ NOTES ============
       function renderNotes() {
         return `
-          <div id="notes-container" class="h-full overflow-y-auto p-6 custom-scrollbar">
+          <div class="h-full overflow-y-auto p-6">
             <div class="flex justify-between items-center mb-6">
-              <div>
-                <h2 class="text-2xl font-bold text-white">📝 Notes</h2>
-                <p class="text-gray-400 text-sm">${state.notes.length} notes total</p>
-              </div>
+              <h2 class="text-2xl font-bold text-white">📝 Notes</h2>
               <button id="add-note" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition flex items-center gap-2">
                 <i class="fa-solid fa-plus"></i> New Note
               </button>
             </div>
-            
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               ${state.notes.map(note => `
                 <div class="glass rounded-lg p-4 hover:bg-white/5 transition group">
                   <div class="flex justify-between items-start">
                     <h4 class="text-white font-semibold">${note.title}</h4>
                     <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition">
-                      <button class="text-gray-400 hover:text-blue-400 transition edit-note" data-id="${note._id}">
-                        <i class="fa-regular fa-pen-to-square"></i>
-                      </button>
                       <button class="text-gray-400 hover:text-red-400 transition delete-note" data-id="${note._id}">
                         <i class="fa-regular fa-trash-can"></i>
                       </button>
                     </div>
                   </div>
                   <p class="text-gray-400 text-sm mt-2 line-clamp-3">${note.content || 'No content'}</p>
-                  <div class="flex justify-between items-center mt-3">
-                    <div class="flex gap-1">
-                      ${(note.tags || []).map(tag => `<span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400">#${tag}</span>`).join('')}
-                    </div>
-                    <span class="text-gray-500 text-xs">${new Date(note.updatedAt || note.createdAt).toLocaleDateString()}</span>
-                  </div>
+                  <span class="text-gray-500 text-xs mt-3 block">${new Date(note.updatedAt || note.createdAt).toLocaleDateString()}</span>
                 </div>
               `).join('')}
-              ${state.notes.length === 0 ? `
-                <div class="col-span-full text-center py-12 text-gray-500">
-                  <div class="text-4xl mb-3">📝</div>
-                  <p>No notes yet. Create your first note!</p>
-                </div>
-              ` : ''}
+              ${state.notes.length === 0 ? '<div class="col-span-full text-center py-12 text-gray-500">No notes yet</div>' : ''}
             </div>
           </div>
         `;
       }
 
-      // ============ TASKS PAGE ============
+      // ============ TASKS ============
       function renderTasks() {
         const pending = state.tasks.filter(t => !t.completed);
         const completed = state.tasks.filter(t => t.completed);
-        
+
         return `
-          <div id="tasks-container" class="h-full overflow-y-auto p-6 custom-scrollbar">
+          <div class="h-full overflow-y-auto p-6">
             <div class="flex justify-between items-center mb-6">
-              <div>
-                <h2 class="text-2xl font-bold text-white">✅ Tasks</h2>
-                <p class="text-gray-400 text-sm">${pending.length} pending · ${completed.length} completed</p>
-              </div>
+              <h2 class="text-2xl font-bold text-white">✅ Tasks</h2>
               <button id="add-task" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition flex items-center gap-2">
                 <i class="fa-solid fa-plus"></i> New Task
               </button>
             </div>
-            
             <div class="space-y-2">
               <h4 class="text-sm text-gray-500 font-medium">Pending</h4>
               ${pending.map(task => `
@@ -1040,10 +1067,7 @@
                   <div class="flex-1">
                     <div class="text-white">${task.title}</div>
                     ${task.description ? `<div class="text-gray-400 text-sm">${task.description}</div>` : ''}
-                    <div class="flex gap-3 mt-1">
-                      ${task.dueDate ? `<span class="text-gray-500 text-xs">📅 ${new Date(task.dueDate).toLocaleDateString()}</span>` : ''}
-                      ${task.priority ? `<span class="text-xs px-2 py-0.5 rounded-full ${task.priority === 'high' ? 'bg-red-500/20 text-red-400' : task.priority === 'medium' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-green-500/20 text-green-400'}">${task.priority}</span>` : ''}
-                    </div>
+                    ${task.dueDate ? `<div class="text-gray-500 text-xs">Due: ${new Date(task.dueDate).toLocaleDateString()}</div>` : ''}
                   </div>
                   <button class="text-gray-400 hover:text-red-400 transition delete-task" data-id="${task._id}">
                     <i class="fa-regular fa-trash-can"></i>
@@ -1051,35 +1075,48 @@
                 </div>
               `).join('')}
               ${pending.length === 0 ? '<div class="text-gray-500 text-center py-4">No pending tasks 🎉</div>' : ''}
-              
-              ${completed.length > 0 ? `
-                <h4 class="text-sm text-gray-500 font-medium mt-4">Completed</h4>
-                ${completed.map(task => `
-                  <div class="glass rounded-lg p-4 flex items-center gap-4 opacity-60 hover:opacity-100 transition">
-                    <button class="toggle-task text-2xl" data-id="${task._id}">
-                      <i class="fa-solid fa-circle-check text-green-400"></i>
-                    </button>
-                    <div class="flex-1">
-                      <div class="text-white line-through">${task.title}</div>
-                      ${task.description ? `<div class="text-gray-500 text-sm line-through">${task.description}</div>` : ''}
-                    </div>
-                    <button class="text-gray-400 hover:text-red-400 transition delete-task" data-id="${task._id}">
-                      <i class="fa-regular fa-trash-can"></i>
-                    </button>
-                  </div>
-                `).join('')}
-              ` : ''}
             </div>
           </div>
         `;
       }
 
-      // ============ SETTINGS PAGE ============
+      // ============ FILES ============
+      function renderFiles() {
+        return `
+          <div class="h-full overflow-y-auto p-6">
+            <div class="flex justify-between items-center mb-6">
+              <h2 class="text-2xl font-bold text-white">📁 Files</h2>
+              <label class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition cursor-pointer flex items-center gap-2">
+                <i class="fa-solid fa-upload"></i> Upload
+                <input type="file" id="file-upload" class="hidden" multiple />
+              </label>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              ${state.files.map(file => `
+                <div class="glass rounded-lg p-4 hover:bg-white/5 transition group">
+                  <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-file text-blue-400 text-2xl"></i>
+                    <div class="flex-1">
+                      <div class="text-white text-sm truncate">${file.originalName}</div>
+                      <div class="text-gray-500 text-xs">${(file.size / 1024).toFixed(1)} KB</div>
+                    </div>
+                    <button class="text-gray-400 hover:text-red-400 transition delete-file" data-id="${file._id}">
+                      <i class="fa-regular fa-trash-can"></i>
+                    </button>
+                  </div>
+                </div>
+              `).join('')}
+              ${state.files.length === 0 ? '<div class="col-span-full text-center py-12 text-gray-500">No files uploaded</div>' : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      // ============ SETTINGS ============
       function renderSettings() {
         return `
-          <div id="settings-container" class="h-full overflow-y-auto p-6 custom-scrollbar">
+          <div class="h-full overflow-y-auto p-6">
             <h2 class="text-2xl font-bold text-white mb-6">⚙️ Settings</h2>
-            
             <div class="max-w-2xl space-y-6">
               <div class="glass rounded-lg p-4">
                 <h3 class="text-white font-semibold mb-3">Profile</h3>
@@ -1094,52 +1131,31 @@
                   </div>
                 </div>
               </div>
-              
+
               <div class="glass rounded-lg p-4">
-                <h3 class="text-white font-semibold mb-2">Theme</h3>
-                <div class="flex gap-2">
-                  <button class="theme-btn px-4 py-2 rounded-lg ${state.theme === 'dark' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-gray-700 text-gray-400 border border-transparent'}" data-theme="dark">
-                    <i class="fa-solid fa-moon mr-2"></i>Dark
-                  </button>
-                  <button class="theme-btn px-4 py-2 rounded-lg ${state.theme === 'light' ? 'bg-blue-500/20 text-blue-400 border border-blue-500/30' : 'bg-gray-700 text-gray-400 border border-transparent'}" data-theme="light">
-                    <i class="fa-solid fa-sun mr-2"></i>Light
-                  </button>
-                </div>
-              </div>
-              
-              <div class="glass rounded-lg p-4">
-                <h3 class="text-white font-semibold mb-2">Voice Settings</h3>
-                <div class="space-y-3">
-                  <div>
-                    <label class="text-gray-400 text-sm">Voice</label>
-                    <select id="voice-select" class="w-full mt-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-blue-500 focus:outline-none">
-                      <option value="alloy" ${state.user?.preferences?.voice === 'alloy' ? 'selected' : ''}>Alloy</option>
-                      <option value="echo" ${state.user?.preferences?.voice === 'echo' ? 'selected' : ''}>Echo</option>
-                      <option value="fable" ${state.user?.preferences?.voice === 'fable' ? 'selected' : ''}>Fable</option>
-                      <option value="onyx" ${state.user?.preferences?.voice === 'onyx' ? 'selected' : ''}>Onyx</option>
-                      <option value="nova" ${state.user?.preferences?.voice === 'nova' ? 'selected' : ''}>Nova</option>
-                      <option value="shimmer" ${state.user?.preferences?.voice === 'shimmer' ? 'selected' : ''}>Shimmer</option>
-                    </select>
-                  </div>
-                  <div>
-                    <label class="text-gray-400 text-sm">Wake Word</label>
-                    <input type="text" id="wake-word" value="${state.user?.preferences?.wakeWord || 'Jarvis'}" class="w-full mt-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-blue-500 focus:outline-none" />
-                  </div>
-                </div>
-              </div>
-              
-              <div class="glass rounded-lg p-4">
-                <h3 class="text-white font-semibold mb-2">Language</h3>
-                <select id="language-select" class="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-blue-500 focus:outline-none">
-                  <option value="en" ${state.user?.preferences?.language === 'en' ? 'selected' : ''}>English</option>
-                  <option value="es" ${state.user?.preferences?.language === 'es' ? 'selected' : ''}>Español</option>
-                  <option value="fr" ${state.user?.preferences?.language === 'fr' ? 'selected' : ''}>Français</option>
-                  <option value="de" ${state.user?.preferences?.language === 'de' ? 'selected' : ''}>Deutsch</option>
-                  <option value="zh" ${state.user?.preferences?.language === 'zh' ? 'selected' : ''}>中文</option>
-                  <option value="ja" ${state.user?.preferences?.language === 'ja' ? 'selected' : ''}>日本語</option>
+                <h3 class="text-white font-semibold mb-2">AI Model</h3>
+                <select id="settings-model" class="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-blue-500 focus:outline-none">
+                  ${state.aiModels.map(m => `<option value="${m}" ${state.user?.preferences?.aiModel === m ? 'selected' : ''}>${m}</option>`).join('')}
                 </select>
               </div>
-              
+
+              <div class="glass rounded-lg p-4">
+                <h3 class="text-white font-semibold mb-2">Voice Settings</h3>
+                <select id="settings-voice" class="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-blue-500 focus:outline-none">
+                  <option value="alloy">Alloy</option>
+                  <option value="echo">Echo</option>
+                  <option value="fable">Fable</option>
+                  <option value="onyx">Onyx</option>
+                  <option value="nova">Nova</option>
+                  <option value="shimmer">Shimmer</option>
+                </select>
+                <div class="mt-2">
+                  <label class="text-gray-400 text-sm">Wake Word</label>
+                  <input type="text" id="settings-wake" value="${state.user?.preferences?.wakeWord || 'Jarvis'}"
+                    class="w-full mt-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-blue-500 focus:outline-none" />
+                </div>
+              </div>
+
               <button id="save-settings" class="px-6 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition flex items-center gap-2">
                 <i class="fa-regular fa-floppy-disk"></i> Save Settings
               </button>
@@ -1148,12 +1164,11 @@
         `;
       }
 
-      // ============ ADMIN PAGE ============
+      // ============ ADMIN ============
       function renderAdmin() {
         return `
-          <div id="admin-container" class="h-full overflow-y-auto p-6 custom-scrollbar">
+          <div class="h-full overflow-y-auto p-6">
             <h2 class="text-2xl font-bold text-white mb-6">🛡️ Admin Dashboard</h2>
-            
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               ${[
                 { label: 'Users', value: state.adminStats.totalUsers || 0, icon: 'fa-users', color: 'text-blue-400' },
@@ -1168,7 +1183,6 @@
                 </div>
               `).join('')}
             </div>
-            
             <div class="glass rounded-lg overflow-hidden">
               <div class="overflow-x-auto">
                 <table class="w-full">
@@ -1178,84 +1192,34 @@
                       <th class="px-4 py-3 text-left text-gray-400 text-sm">Email</th>
                       <th class="px-4 py-3 text-left text-gray-400 text-sm">Subscription</th>
                       <th class="px-4 py-3 text-left text-gray-400 text-sm">Chats</th>
-                      <th class="px-4 py-3 text-left text-gray-400 text-sm">Joined</th>
                     </tr>
                   </thead>
                   <tbody>
                     ${state.adminUsers.map(user => `
                       <tr class="border-t border-white/5 hover:bg-white/5 transition">
-                        <td class="px-4 py-3 text-white flex items-center gap-2">
-                          <div class="w-6 h-6 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white text-xs font-bold">
-                            ${user.username?.charAt(0).toUpperCase() || 'U'}
-                          </div>
-                          ${user.username}
-                        </td>
+                        <td class="px-4 py-3 text-white">${user.username}</td>
                         <td class="px-4 py-3 text-gray-400 text-sm">${user.email}</td>
                         <td class="px-4 py-3">
                           <span class="px-2 py-1 rounded text-xs ${user.subscription === 'premium' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-gray-700 text-gray-400'}">${user.subscription || 'free'}</span>
                         </td>
                         <td class="px-4 py-3 text-gray-400">${user.usage?.chats || 0}</td>
-                        <td class="px-4 py-3 text-gray-400 text-sm">${new Date(user.createdAt).toLocaleDateString()}</td>
                       </tr>
                     `).join('')}
-                    ${state.adminUsers.length === 0 ? '<tr><td colspan="5" class="text-center text-gray-500 py-8">No users found</td></tr>' : ''}
                   </tbody>
                 </table>
               </div>
-            </div>
-            
-            <div class="mt-4 flex gap-2">
-              <button id="admin-refresh" class="px-4 py-2 rounded-lg glass text-white hover:bg-white/10 transition flex items-center gap-2">
-                <i class="fa-solid fa-rotate"></i> Refresh
-              </button>
             </div>
           </div>
         `;
       }
 
-      // ============ TOAST ============
-      function showToast(message, type = 'info') {
-        const container = document.getElementById('toast-container');
-        if (!container) return;
-        
-        const colors = {
-          success: 'border-green-500 text-green-400 bg-green-500/10',
-          error: 'border-red-500 text-red-400 bg-red-500/10',
-          info: 'border-blue-500 text-blue-400 bg-blue-500/10',
-          warning: 'border-yellow-500 text-yellow-400 bg-yellow-500/10'
-        };
-        
-        const icons = {
-          success: 'fa-circle-check',
-          error: 'fa-circle-xmark',
-          info: 'fa-circle-info',
-          warning: 'fa-triangle-exclamation'
-        };
-        
-        const toast = document.createElement('div');
-        toast.className = `glass px-4 py-3 rounded-lg border-l-4 ${colors[type] || colors.info} toast pointer-events-auto flex items-center gap-3`;
-        toast.innerHTML = `
-          <i class="fa-solid ${icons[type] || icons.info}"></i>
-          <span>${message}</span>
-        `;
-        container.appendChild(toast);
-        
-        setTimeout(() => {
-          toast.classList.add('toast-exit');
-          setTimeout(() => toast.remove(), 300);
-        }, 3000);
-      }
+      // ============ HELPERS ============
 
-      // ============ MARKDOWN RENDERER ============
       function renderMarkdown(text) {
         if (!text) return '';
-        
         let html = text;
-        
-        html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) => {
-          return `<pre><code class="language-${lang || 'text'}">${escapeHtml(code.trim())}</code></pre>`;
-        });
-        
+        html = html.replace(/```(\w+)?\n([\s\S]*?)```/g, (_, lang, code) =>
+          `<pre><code>${escapeHtml(code.trim())}</code></pre>`);
         html = html.replace(/`([^`]+)`/g, '<code>$1</code>');
         html = html.replace(/^### (.*$)/gm, '<h3>$1</h3>');
         html = html.replace(/^## (.*$)/gm, '<h2>$1</h2>');
@@ -1267,7 +1231,6 @@
         html = html.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" class="text-blue-400 hover:underline">$1</a>');
         html = html.replace(/^> (.*$)/gm, '<blockquote>$1</blockquote>');
         html = html.replace(/\n/g, '<br />');
-        
         return html;
       }
 
@@ -1277,7 +1240,37 @@
         return div.innerHTML;
       }
 
+      function showToast(message, type = 'info') {
+        const container = document.getElementById('toast-container');
+        if (!container) return;
+
+        const colors = {
+          success: 'border-green-500 text-green-400 bg-green-500/10',
+          error: 'border-red-500 text-red-400 bg-red-500/10',
+          info: 'border-blue-500 text-blue-400 bg-blue-500/10',
+          warning: 'border-yellow-500 text-yellow-400 bg-yellow-500/10'
+        };
+
+        const icons = {
+          success: 'fa-circle-check',
+          error: 'fa-circle-xmark',
+          info: 'fa-circle-info',
+          warning: 'fa-triangle-exclamation'
+        };
+
+        const toast = document.createElement('div');
+        toast.className = `glass px-4 py-3 rounded-lg border-l-4 ${colors[type] || colors.info} toast pointer-events-auto flex items-center gap-3`;
+        toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i><span>${message}</span>`;
+        container.appendChild(toast);
+
+        setTimeout(() => {
+          toast.classList.add('toast-exit');
+          setTimeout(() => toast.remove(), 300);
+        }, 3000);
+      }
+
       // ============ CHAT FUNCTIONS ============
+
       async function sendChatMessage(text) {
         if (!text.trim() || state.isLoading) return;
 
@@ -1285,44 +1278,90 @@
         state.messages.push(userMessage);
         state.isLoading = true;
         render();
-        
+
         try {
-          const data = await API.post('/chat', {
-            messages: state.messages.map(m => ({ role: m.role, content: m.content })),
-            model: 'gpt-3.5-turbo'
+          const model = document.getElementById('model-select')?.value || 'gpt-3.5-turbo';
+
+          const response = await fetch(`${API.base}/chat/stream`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+              'Authorization': `Bearer ${state.token}`
+            },
+            body: JSON.stringify({
+              messages: state.messages.map(m => ({ role: m.role, content: m.content })),
+              model
+            })
           });
-          
-          state.messages.push({ role: 'assistant', content: data.content, timestamp: Date.now() });
-          
-          if (state.voiceEnabled) {
-            speakText(data.content);
+
+          const reader = response.body.getReader();
+          const decoder = new TextDecoder();
+          let fullContent = '';
+
+          while (true) {
+            const { done, value } = await reader.read();
+            if (done) break;
+
+            const chunk = decoder.decode(value);
+            const lines = chunk.split('\n');
+
+            for (const line of lines) {
+              if (line.startsWith('data: ')) {
+                const data = line.slice(6);
+                if (data === '[DONE]') continue;
+                try {
+                  const parsed = JSON.parse(data);
+                  if (parsed.content) {
+                    fullContent += parsed.content;
+                    // Update the last message in real-time
+                    const lastMsg = state.messages[state.messages.length - 1];
+                    if (lastMsg && lastMsg.role === 'assistant') {
+                      lastMsg.content = fullContent;
+                    } else {
+                      state.messages.push({ role: 'assistant', content: fullContent, timestamp: Date.now() });
+                    }
+                    render();
+                    const end = document.getElementById('chat-end');
+                    if (end) end.scrollIntoView({ behavior: 'smooth' });
+                  }
+                } catch (e) {
+                  // Skip invalid JSON
+                }
+              }
+            }
           }
-          
+
+          // Save final message
+          if (state.messages.length > 0 && state.messages[state.messages.length - 1].role === 'assistant') {
+            // Text-to-speech
+            if (state.voiceEnabled) {
+              speakText(fullContent);
+            }
+          }
+
           await loadChats();
         } catch (error) {
           state.messages.push({ role: 'assistant', content: `Error: ${error.message}`, timestamp: Date.now() });
           showToast('Failed to get response', 'error');
         }
-        
+
         state.isLoading = false;
         render();
-        
         const end = document.getElementById('chat-end');
         if (end) end.scrollIntoView({ behavior: 'smooth' });
       }
 
       function speakText(text) {
         if (!state.speechSynthesis) return;
-        
         if (state.currentUtterance) {
           state.speechSynthesis.cancel(state.currentUtterance);
         }
-        
+
         const utterance = new SpeechSynthesisUtterance(text);
         utterance.rate = 0.9;
         utterance.pitch = 1.1;
         utterance.voice = state.speechSynthesis.getVoices().find(v => v.lang.includes('en')) || null;
-        
+
         state.currentUtterance = utterance;
         state.speechSynthesis.speak(utterance);
       }
@@ -1332,15 +1371,15 @@
           showToast('Voice recognition not supported', 'error');
           return;
         }
-        
+
         state.isRecording = true;
         render();
-        
+
         const recognition = new webkitSpeechRecognition();
         recognition.lang = 'en-US';
         recognition.continuous = false;
         recognition.interimResults = true;
-        
+
         recognition.onresult = (event) => {
           let final = '';
           for (let i = event.resultIndex; i < event.results.length; i++) {
@@ -1356,54 +1395,56 @@
             }
           }
         };
-        
+
         recognition.onend = () => {
           state.isRecording = false;
           render();
         };
-        
+
         recognition.onerror = () => {
           state.isRecording = false;
           render();
           showToast('Voice recognition error', 'error');
         };
-        
+
         recognition.start();
       }
 
       // ============ DATA LOADERS ============
-      async function loadChats() {
+
+      async function loadData() {
         try {
-          state.chats = await API.get('/chat/history');
+          await Promise.all([loadChats(), loadNotes(), loadTasks(), loadFiles(), loadReminders()]);
         } catch (error) {
-          state.chats = [];
+          // Silently fail
         }
+      }
+
+      async function loadChats() {
+        try { state.chats = await API.get('/chat/history'); } catch (e) { state.chats = []; }
       }
 
       async function loadNotes() {
-        try {
-          state.notes = await API.get('/notes');
-        } catch (error) {
-          state.notes = [];
-        }
+        try { state.notes = await API.get('/notes'); } catch (e) { state.notes = []; }
       }
 
       async function loadTasks() {
-        try {
-          state.tasks = await API.get('/tasks');
-        } catch (error) {
-          state.tasks = [];
-        }
+        try { state.tasks = await API.get('/tasks'); } catch (e) { state.tasks = []; }
       }
 
-      async function loadDashboard() {
+      async function loadFiles() {
+        try { state.files = await API.get('/files'); } catch (e) { state.files = []; }
+      }
+
+      async function loadReminders() {
+        try { state.reminders = await API.get('/reminders'); } catch (e) { state.reminders = []; }
+      }
+
+      async function loadWeather() {
         try {
-          const weather = await API.get('/weather?city=London');
-          state.weather = weather;
-          await Promise.all([loadChats(), loadNotes(), loadTasks()]);
-          render();
-        } catch (error) {
-          // Silently fail
+          state.weather = await API.get('/weather?city=London');
+        } catch (e) {
+          state.weather = null;
         }
       }
 
@@ -1421,25 +1462,33 @@
         }
       }
 
-      // ============ CLOCK UPDATER ============
+      // ============ SOCKET.IO ============
+
+      function initSocket() {
+        // Socket.IO connection would go here
+        // For now, we'll use the existing API
+      }
+
+      // ============ CLOCK ============
+
       function updateClock() {
         state.date = new Date();
         const clock = document.getElementById('clock');
-        if (clock) {
-          clock.textContent = state.date.toLocaleTimeString();
-        }
+        if (clock) clock.textContent = state.date.toLocaleTimeString();
       }
 
       // ============ EVENT BINDINGS ============
+
       function bindAppEvents() {
         // Sidebar navigation
         document.querySelectorAll('.sidebar-item[data-page]').forEach(el => {
           el.addEventListener('click', () => {
             state.currentPage = el.dataset.page;
+            if (state.currentPage === 'admin') loadAdmin();
             render();
           });
         });
-        
+
         // Tool navigation
         document.querySelectorAll('[data-tool]').forEach(el => {
           el.addEventListener('click', () => {
@@ -1448,38 +1497,32 @@
             render();
           });
         });
-        
+
         // Sidebar toggle
-        const sidebarToggle = document.getElementById('sidebar-toggle');
-        if (sidebarToggle) {
-          sidebarToggle.addEventListener('click', () => {
-            const sidebar = document.querySelector('.sidebar');
-            if (sidebar) {
-              sidebar.classList.toggle('w-20');
-              sidebar.classList.toggle('w-64');
-            }
-          });
-        }
-        
+        document.getElementById('sidebar-toggle')?.addEventListener('click', () => {
+          const sidebar = document.querySelector('.sidebar');
+          if (sidebar) {
+            sidebar.classList.toggle('w-20');
+            sidebar.classList.toggle('w-64');
+          }
+        });
+
         // Logout
-        const logoutBtn = document.getElementById('logout-btn');
-        if (logoutBtn) {
-          logoutBtn.addEventListener('click', () => {
-            if (confirm('Are you sure you want to logout?')) {
-              localStorage.removeItem('jarvis_token');
-              state.token = null;
-              render();
-              showToast('Logged out successfully', 'info');
-            }
-          });
-        }
-        
+        document.getElementById('logout-btn')?.addEventListener('click', () => {
+          if (confirm('Are you sure you want to logout?')) {
+            localStorage.removeItem('jarvis_token');
+            state.token = null;
+            render();
+            showToast('Logged out successfully', 'info');
+          }
+        });
+
         // Chat
         const sendBtn = document.getElementById('send-btn');
         const chatInput = document.getElementById('chat-input');
         const stopBtn = document.getElementById('stop-btn');
-        const clearChatBtn = document.getElementById('clear-chat-btn');
-        
+        const clearChat = document.getElementById('clear-chat');
+
         if (sendBtn && chatInput) {
           const sendMessage = () => {
             const text = chatInput.value.trim();
@@ -1489,7 +1532,7 @@
               sendChatMessage(text);
             }
           };
-          
+
           sendBtn.addEventListener('click', sendMessage);
           chatInput.addEventListener('keypress', (e) => {
             if (e.key === 'Enter' && !e.shiftKey) {
@@ -1501,7 +1544,7 @@
             state.input = e.target.value;
           });
         }
-        
+
         if (stopBtn) {
           stopBtn.addEventListener('click', () => {
             state.isLoading = false;
@@ -1512,9 +1555,9 @@
             showToast('Generation stopped', 'warning');
           });
         }
-        
-        if (clearChatBtn) {
-          clearChatBtn.addEventListener('click', () => {
+
+        if (clearChat) {
+          clearChat.addEventListener('click', () => {
             if (state.messages.length === 0) return;
             if (confirm('Clear all messages?')) {
               state.messages = [];
@@ -1523,7 +1566,7 @@
             }
           });
         }
-        
+
         // Quick prompts
         document.querySelectorAll('.quick-prompt').forEach(el => {
           el.addEventListener('click', () => {
@@ -1535,83 +1578,73 @@
             }
           });
         });
-        
+
         // Voice toggle
-        const voiceToggle = document.getElementById('voice-toggle');
-        if (voiceToggle) {
-          voiceToggle.addEventListener('click', () => {
-            state.voiceEnabled = !state.voiceEnabled;
-            if (!state.voiceEnabled && state.currentUtterance) {
-              state.speechSynthesis.cancel(state.currentUtterance);
-            }
-            render();
-            showToast(state.voiceEnabled ? 'Voice output enabled' : 'Voice output disabled', 'info');
-          });
-        }
-        
+        document.getElementById('voice-toggle')?.addEventListener('click', () => {
+          state.voiceEnabled = !state.voiceEnabled;
+          if (!state.voiceEnabled && state.currentUtterance) {
+            state.speechSynthesis.cancel(state.currentUtterance);
+          }
+          render();
+          showToast(state.voiceEnabled ? 'Voice output enabled' : 'Voice output disabled', 'info');
+        });
+
         // Voice recognition
-        const voiceRecBtn = document.getElementById('voice-rec-btn');
-        if (voiceRecBtn) {
-          voiceRecBtn.addEventListener('click', startVoiceRecognition);
-        }
-        
+        document.getElementById('voice-rec-btn')?.addEventListener('click', startVoiceRecognition);
+
         // Tools
-        const toolGenerate = document.getElementById('tool-generate');
-        if (toolGenerate) {
-          toolGenerate.addEventListener('click', async () => {
-            const input = document.getElementById('tool-input');
-            if (!input) return;
-            
-            state.toolLoading = true;
-            state.toolResult = '';
-            render();
-            
-            try {
-              const endpoints = {
-                'code': '/tools/generate-code',
-                'image': '/tools/generate-image',
-                'summarize': '/tools/summarize',
-                'translate': '/tools/translate',
-                'grammar': '/tools/fix-grammar',
-                'email': '/tools/email-writer'
-              };
-              
-              const endpoint = endpoints[state.toolActive];
-              if (!endpoint) {
-                state.toolResult = 'This tool is not available yet.';
-                state.toolLoading = false;
-                render();
-                return;
-              }
-              
-              const data = await API.post(endpoint, { 
-                prompt: input.value,
-                targetLang: 'Spanish',
-                language: 'javascript',
-                text: input.value
-              });
-              
-              state.toolResult = data.code || data.url || data.summary || data.translated || data.fixed || data.email || 'Done!';
-            } catch (error) {
-              state.toolResult = `Error: ${error.message}`;
+        document.getElementById('tool-generate')?.addEventListener('click', async () => {
+          const input = document.getElementById('tool-input');
+          if (!input) return;
+
+          state.toolLoading = true;
+          state.toolResult = '';
+          render();
+
+          try {
+            const endpoints = {
+              'code': '/tools/generate-code',
+              'image': '/tools/generate-image',
+              'summarize': '/tools/summarize',
+              'translate': '/tools/translate',
+              'grammar': '/tools/fix-grammar',
+              'email': '/tools/email-writer',
+              'search': '/tools/web-search'
+            };
+
+            const endpoint = endpoints[state.toolActive];
+            if (!endpoint) {
+              state.toolResult = 'Tool not available';
+              state.toolLoading = false;
+              render();
+              return;
             }
-            
-            state.toolLoading = false;
-            render();
-          });
-        }
-        
-        // Tool clear
-        const toolClear = document.getElementById('tool-clear');
-        if (toolClear) {
-          toolClear.addEventListener('click', () => {
-            const input = document.getElementById('tool-input');
-            if (input) input.value = '';
-            state.toolResult = '';
-            render();
-          });
-        }
-        
+
+            const data = await API.post(endpoint, {
+              prompt: input.value,
+              targetLang: 'Spanish',
+              language: 'javascript',
+              text: input.value,
+              query: input.value
+            });
+
+            state.toolResult = data.code || data.url || data.summary || data.translated ||
+              data.fixed || data.email || data.AbstractText || 'Done!';
+          } catch (error) {
+            state.toolResult = `Error: ${error.message}`;
+          }
+
+          state.toolLoading = false;
+          render();
+        });
+
+        document.getElementById('tool-clear')?.addEventListener('click', () => {
+          const input = document.getElementById('tool-input');
+          if (input) input.value = '';
+          state.toolResult = '';
+          render();
+        });
+
         // Copy button
         document.querySelectorAll('.copy-btn').forEach(btn => {
           btn.addEventListener('click', () => {
@@ -1622,26 +1655,23 @@
             }
           });
         });
-        
+
         // Notes
-        const addNote = document.getElementById('add-note');
-        if (addNote) {
-          addNote.addEventListener('click', async () => {
-            const title = prompt('Note title:');
-            if (title) {
-              const content = prompt('Note content:');
-              try {
-                await API.post('/notes', { title, content });
-                await loadNotes();
-                render();
-                showToast('Note created!', 'success');
-              } catch (error) {
-                showToast('Failed to create note', 'error');
-              }
+        document.getElementById('add-note')?.addEventListener('click', async () => {
+          const title = prompt('Note title:');
+          if (title) {
+            const content = prompt('Note content:');
+            try {
+              await API.post('/notes', { title, content });
+              await loadNotes();
+              render();
+              showToast('Note created!', 'success');
+            } catch (error) {
+              showToast('Failed to create note', 'error');
             }
-          });
-        }
-        
+          }
+        });
+
         document.querySelectorAll('.delete-note').forEach(btn => {
           btn.addEventListener('click', async () => {
             if (confirm('Delete this note?')) {
@@ -1651,25 +1681,22 @@
             }
           });
         });
-        
+
         // Tasks
-        const addTask = document.getElementById('add-task');
-        if (addTask) {
-          addTask.addEventListener('click', async () => {
-            const title = prompt('Task title:');
-            if (title) {
-              try {
-                await API.post('/tasks', { title, completed: false });
-                await loadTasks();
-                render();
-                showToast('Task added!', 'success');
-              } catch (error) {
-                showToast('Failed to add task', 'error');
-              }
+        document.getElementById('add-task')?.addEventListener('click', async () => {
+          const title = prompt('Task title:');
+          if (title) {
+            try {
+              await API.post('/tasks', { title, completed: false });
+              await loadTasks();
+              render();
+              showToast('Task added!', 'success');
+            } catch (error) {
+              showToast('Failed to add task', 'error');
             }
-          });
-        }
-        
+          }
+        });
+
         document.querySelectorAll('.toggle-task').forEach(btn => {
           btn.addEventListener('click', async () => {
             const task = state.tasks.find(t => t._id === btn.dataset.id);
@@ -1680,7 +1707,7 @@
             }
           });
         });
-        
+
         document.querySelectorAll('.delete-task').forEach(btn => {
           btn.addEventListener('click', async () => {
             if (confirm('Delete this task?')) {
@@ -1690,64 +1717,72 @@
             }
           });
         });
-        
-        // Settings
-        const saveSettings = document.getElementById('save-settings');
-        if (saveSettings) {
-          saveSettings.addEventListener('click', async () => {
-            const voice = document.getElementById('voice-select')?.value || 'alloy';
-            const wakeWord = document.getElementById('wake-word')?.value || 'Jarvis';
-            const language = document.getElementById('language-select')?.value || 'en';
+
+        // Files
+        document.getElementById('file-upload')?.addEventListener('change', async (e) => {
+          const files = e.target.files;
+          for (const file of files) {
             try {
-              await API.put('/user/profile', {
-                preferences: { ...state.user?.preferences, voice, wakeWord, language }
-              });
-              showToast('Settings saved!', 'success');
+              await API.upload('/files/upload', file);
+              showToast(`Uploaded: ${file.name}`, 'success');
             } catch (error) {
-              showToast('Failed to save settings', 'error');
+              showToast(`Failed to upload ${file.name}`, 'error');
+            }
+          }
+          await loadFiles();
+          render();
+        });
+
+        document.querySelectorAll('.delete-file').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (confirm('Delete this file?')) {
+              await API.delete(`/files/${btn.dataset.id}`);
+              await loadFiles();
+              render();
             }
           });
-        }
-        
-        document.querySelectorAll('.theme-btn').forEach(btn => {
-          btn.addEventListener('click', () => {
-            document.querySelectorAll('.theme-btn').forEach(b => {
-              b.className = 'theme-btn px-4 py-2 rounded-lg bg-gray-700 text-gray-400 border border-transparent';
-            });
-            btn.className = 'theme-btn px-4 py-2 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30';
-            state.theme = btn.dataset.theme;
-            // Apply theme logic here (background colors, etc.)
-            showToast(`Theme changed to ${state.theme}`, 'info');
-          });
         });
-        
-        // Admin refresh
-        const adminRefresh = document.getElementById('admin-refresh');
-        if (adminRefresh) {
-          adminRefresh.addEventListener('click', loadAdmin);
-        }
-        
+
+        // Settings
+        document.getElementById('save-settings')?.addEventListener('click', async () => {
+          const model = document.getElementById('settings-model')?.value;
+          const voice = document.getElementById('settings-voice')?.value;
+          const wakeWord = document.getElementById('settings-wake')?.value;
+
+          try {
+            await API.put('/user/profile', {
+              preferences: {
+                ...state.user?.preferences,
+                aiModel: model,
+                voice: voice,
+                wakeWord: wakeWord
+              }
+            });
+            showToast('Settings saved!', 'success');
+          } catch (error) {
+            showToast('Failed to save settings', 'error');
+          }
+        });
+
         // Notifications
-        const notificationsBtn = document.getElementById('notifications-btn');
-        if (notificationsBtn) {
-          notificationsBtn.addEventListener('click', () => {
-            state.unreadNotifications = 0;
-            render();
-            showToast('No new notifications', 'info');
-          });
-        }
-        
-        // User menu
-        const userMenuBtn = document.getElementById('user-menu-btn');
-        if (userMenuBtn) {
-          userMenuBtn.addEventListener('click', () => {
-            state.currentPage = 'settings';
-            render();
-          });
-        }
+        document.getElementById('notifications-btn')?.addEventListener('click', () => {
+          state.unreadNotifications = 0;
+          render();
+          showToast('No new notifications', 'info');
+        });
+
+        // Keyboard shortcuts
+        document.addEventListener('keydown', (e) => {
+          if (e.ctrlKey && e.key === 'k') {
+            e.preventDefault();
+            const input = document.getElementById('chat-input');
+            if (input) input.focus();
+          }
+        });
       }
 
       // ============ INIT ============
+
       // Check for existing session
       if (state.token) {
         API.get('/user/profile')
@@ -1755,8 +1790,9 @@
             state.user = user;
             render();
             setInterval(updateClock, 1000);
-            loadChats();
-            loadDashboard();
+            loadWeather();
+            loadData();
+            initSocket();
           })
           .catch(() => {
             state.token = null;
@@ -1767,14 +1803,12 @@
         render();
       }
 
-      // Make API and state available globally for debugging
-      window.__JARVIS = { API, state, render, sendChatMessage, showToast };
+      // Expose for debugging
+      window.__JARVIS = { state, API, render, sendChatMessage, showToast };
 
-      console.log('🤖 J.A.R.V.I.S. AI Assistant v2.0');
-      console.log('📡 Backend: http://localhost:5000');
-      console.log('🔌 WebSocket: ws://localhost:5000');
+      console.log('🤖 J.A.R.V.I.S. Premium v2.0');
+      console.log('📡 Backend:', API.base);
       console.log('💡 Press Ctrl+K to focus chat');
-      console.log('📊 Type window.__JARVIS for debugging');
 
     })();
   </script>
