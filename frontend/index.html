@@ -3,15 +3,15 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>J.A.R.V.I.S. - Premium AI Assistant</title>
+  <title>J.A.R.V.I.S. - Premium 3D AI Assistant</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
 
-  <!-- Three.js for 3D -->
+  <!-- Three.js Core -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
 
-  <!-- GSAP for animations -->
+  <!-- GSAP -->
   <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.2/gsap.min.js"></script>
 
   <!-- Font Awesome -->
@@ -21,7 +21,6 @@
   <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
 
   <style>
-    /* ============ RESET ============ */
     * {
       margin: 0;
       padding: 0;
@@ -39,18 +38,17 @@
     #root {
       height: 100vh;
       overflow: hidden;
+      position: relative;
     }
 
-    /* ============ SCROLLBAR ============ */
-    ::-webkit-scrollbar {
-      width: 4px;
-    }
-    ::-webkit-scrollbar-track {
-      background: transparent;
-    }
-    ::-webkit-scrollbar-thumb {
-      background: #3b82f6;
-      border-radius: 2px;
+    /* Three.js Container */
+    #three-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      z-index: 0;
     }
 
     /* ============ GLASSMORPHISM ============ */
@@ -62,13 +60,13 @@
     }
 
     .glass-dark {
-      background: rgba(0, 0, 0, 0.5);
+      background: rgba(0, 0, 0, 0.6);
       backdrop-filter: blur(20px);
       -webkit-backdrop-filter: blur(20px);
       border: 1px solid rgba(255, 255, 255, 0.05);
     }
 
-    /* ============ GRADIENT TEXT ============ */
+    /* ============ GRADIENT ============ */
     .gradient-text {
       background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
       -webkit-background-clip: text;
@@ -80,7 +78,7 @@
       text-shadow: 0 0 20px rgba(59, 130, 246, 0.5), 0 0 60px rgba(59, 130, 246, 0.2);
     }
 
-    /* ============ CHAT BUBBLES ============ */
+    /* ============ CHAT ============ */
     .chat-bubble-user {
       background: linear-gradient(135deg, #3b82f6, #6366f1);
       color: white;
@@ -106,7 +104,6 @@
       cursor: pointer;
       color: #9ca3af;
       position: relative;
-      overflow: hidden;
     }
 
     .sidebar-item:hover {
@@ -131,23 +128,12 @@
       border-radius: 0 3px 3px 0;
     }
 
-    /* ============ JARVIS ORB ============ */
-    #three-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      z-index: 0;
-      pointer-events: none;
-    }
-
     /* ============ VOICE WAVEFORM ============ */
     .waveform-container {
       display: flex;
       align-items: center;
       justify-content: center;
-      gap: 3px;
+      gap: 4px;
       height: 60px;
     }
 
@@ -160,82 +146,43 @@
 
     /* ============ ANIMATIONS ============ */
     @keyframes float {
-      0%,
-      100% {
-        transform: translateY(0px);
-      }
-      50% {
-        transform: translateY(-10px);
-      }
+      0%, 100% { transform: translateY(0px); }
+      50% { transform: translateY(-10px); }
     }
-    .float {
-      animation: float 3s ease-in-out infinite;
-    }
+    .float { animation: float 3s ease-in-out infinite; }
 
     @keyframes pulse-ring {
-      0% {
-        transform: scale(0.95);
-        opacity: 0.7;
-      }
-      50% {
-        transform: scale(1.05);
-        opacity: 0.3;
-      }
-      100% {
-        transform: scale(0.95);
-        opacity: 0.7;
-      }
+      0% { transform: scale(0.95); opacity: 0.7; }
+      50% { transform: scale(1.05); opacity: 0.3; }
+      100% { transform: scale(0.95); opacity: 0.7; }
     }
-    .pulse-ring {
-      animation: pulse-ring 2s ease-in-out infinite;
-    }
+    .pulse-ring { animation: pulse-ring 2s ease-in-out infinite; }
 
     @keyframes glow-pulse {
-      0%,
-      100% {
-        box-shadow: 0 0 20px rgba(59, 130, 246, 0.3);
-      }
-      50% {
-        box-shadow: 0 0 60px rgba(59, 130, 246, 0.6);
-      }
+      0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+      50% { box-shadow: 0 0 60px rgba(59, 130, 246, 0.6); }
     }
-    .glow-pulse {
-      animation: glow-pulse 2s ease-in-out infinite;
-    }
+    .glow-pulse { animation: glow-pulse 2s ease-in-out infinite; }
 
     @keyframes typing-dot {
-      0%,
-      60%,
-      100% {
-        transform: translateY(0);
-      }
-      30% {
-        transform: translateY(-10px);
-      }
+      0%, 60%, 100% { transform: translateY(0); }
+      30% { transform: translateY(-10px); }
     }
-    .typing-dot {
-      animation: typing-dot 1.4s infinite;
-    }
-    .typing-dot:nth-child(2) {
-      animation-delay: 0.2s;
-    }
-    .typing-dot:nth-child(3) {
-      animation-delay: 0.4s;
-    }
+    .typing-dot { animation: typing-dot 1.4s infinite; }
+    .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+    .typing-dot:nth-child(3) { animation-delay: 0.4s; }
 
     @keyframes slide-in {
-      from {
-        transform: translateX(100px);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
+      from { transform: translateX(100px); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
-    .slide-in {
-      animation: slide-in 0.3s ease-out;
+    .slide-in { animation: slide-in 0.3s ease-out; }
+
+    @keyframes fade-in {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
     }
+    .fade-in { animation: fade-in 0.3s ease-out; }
 
     /* ============ MARKDOWN ============ */
     .markdown pre {
@@ -246,51 +193,30 @@
       margin: 0.5rem 0;
       border: 1px solid rgba(255, 255, 255, 0.05);
     }
-    .markdown code {
-      color: #f472b6;
-      font-size: 0.9em;
-    }
-    .markdown h1,
-    .markdown h2,
-    .markdown h3 {
-      font-weight: 600;
-      margin: 0.75rem 0 0.5rem 0;
-    }
-    .markdown ul,
-    .markdown ol {
-      padding-left: 1.5rem;
-      margin: 0.5rem 0;
-    }
-    .markdown li {
-      margin: 0.25rem 0;
-    }
-    .markdown blockquote {
-      border-left: 3px solid #3b82f6;
-      padding-left: 1rem;
-      color: #9ca3af;
-      margin: 0.5rem 0;
-    }
+    .markdown code { color: #f472b6; font-size: 0.9em; }
+    .markdown h1, .markdown h2, .markdown h3 { font-weight: 600; margin: 0.75rem 0 0.5rem 0; }
+    .markdown ul, .markdown ol { padding-left: 1.5rem; margin: 0.5rem 0; }
+    .markdown li { margin: 0.25rem 0; }
+    .markdown blockquote { border-left: 3px solid #3b82f6; padding-left: 1rem; color: #9ca3af; margin: 0.5rem 0; }
+
+    /* ============ SCROLLBAR ============ */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 2px; }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 2px; }
 
     /* ============ RESPONSIVE ============ */
     @media (max-width: 768px) {
-      .sidebar {
-        width: 64px;
-      }
-      .sidebar-label {
-        display: none !important;
-      }
-      .mobile-hide {
-        display: none !important;
-      }
+      .sidebar { width: 64px; }
+      .sidebar-label { display: none !important; }
+      .mobile-hide { display: none !important; }
     }
 
     @media (max-width: 480px) {
-      .text-3xl {
-        font-size: 1.5rem;
-      }
-      .p-6 {
-        padding: 1rem;
-      }
+      .text-3xl { font-size: 1.5rem; }
+      .p-6 { padding: 1rem; }
     }
 
     /* ============ LOADING ============ */
@@ -302,11 +228,7 @@
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
-    @keyframes spin {
-      to {
-        transform: rotate(360deg);
-      }
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
     /* ============ TOAST ============ */
     .toast {
@@ -314,10 +236,7 @@
       transform: translateX(0);
       pointer-events: auto;
     }
-    .toast-exit {
-      opacity: 0;
-      transform: translateX(100px);
-    }
+    .toast-exit { opacity: 0; transform: translateX(100px); }
 
     /* ============ BADGE ============ */
     .badge {
@@ -335,6 +254,20 @@
       color: white;
       font-weight: 600;
     }
+
+    /* ============ ROBOT STATUS ============ */
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      transition: all 0.3s;
+    }
+    .status-idle { background: #3b82f6; box-shadow: 0 0 10px #3b82f6; }
+    .status-listening { background: #22c55e; box-shadow: 0 0 10px #22c55e; }
+    .status-thinking { background: #8b5cf6; box-shadow: 0 0 10px #8b5cf6; }
+    .status-speaking { background: #06b6d4; box-shadow: 0 0 10px #06b6d4; }
+    .status-error { background: #ef4444; box-shadow: 0 0 10px #ef4444; }
   </style>
 </head>
 <body>
@@ -355,7 +288,7 @@
     </div>
   </div>
 
-  <!-- ============ LOADING OVERLAY ============ -->
+  <!-- ============ LOADING ============ -->
   <div id="loading-overlay" class="fixed inset-0 z-50 flex items-center justify-center bg-[#0a0a0f]" style="display: none;">
     <div class="text-center">
       <div class="text-6xl mb-4 float">🤖</div>
@@ -364,129 +297,592 @@
     </div>
   </div>
 
-  <!-- ============ COMPLETE JAVASCRIPT ============ -->
+  <!-- ======================================================================== -->
+  <!-- COMPLETE JAVASCRIPT - 3D ROBOT + APP -->
+  <!-- ======================================================================== -->
   <script>
     // ========================================================================
-    // 1. THREE.JS - 3D ANIMATED ORB
+    // CONFIGURATION - Backend URL
     // ========================================================================
-    (function initThree() {
+    const CONFIG = {
+      // === UPDATE THIS WITH YOUR RENDER BACKEND URL ===
+      BACKEND_URL: 'https://my-javis.onrender.com',
+      
+      // For local development, use:
+      // BACKEND_URL: 'http://localhost:10000',
+      
+      get API_URL() {
+        return `${this.BACKEND_URL}/api`;
+      }
+    };
+
+    // ========================================================================
+    // 1. THREE.JS - 3D HUMAN-ROBOT
+    // ========================================================================
+    (function initRobot() {
       const container = document.getElementById('three-container');
 
+      // ============ SCENE ============
       const scene = new THREE.Scene();
-      const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+      scene.fog = new THREE.FogExp2(0x0a0a0f, 0.035);
+
+      // ============ CAMERA ============
+      const camera = new THREE.PerspectiveCamera(45, window.innerWidth / window.innerHeight, 0.1, 100);
+      camera.position.set(0, 2, 6);
+      camera.lookAt(0, 1.5, 0);
+
+      // ============ RENDERER ============
       const renderer = new THREE.WebGLRenderer({
         antialias: true,
         alpha: true
       });
       renderer.setSize(window.innerWidth, window.innerHeight);
       renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
-      renderer.setClearColor(0x0a0a0f, 0);
+      renderer.shadowMap.enabled = true;
+      renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+      renderer.toneMapping = THREE.ACESFilmicToneMapping;
+      renderer.toneMappingExposure = 1.2;
       container.appendChild(renderer.domElement);
 
-      // Particles
-      const particlesGeometry = new THREE.BufferGeometry();
-      const particlesCount = 2000;
-      const posArray = new Float32Array(particlesCount * 3);
-      for (let i = 0; i < particlesCount * 3; i++) {
-        posArray[i] = (Math.random() - 0.5) * 10;
-      }
-      particlesGeometry.setAttribute('position', new THREE.BufferAttribute(posArray, 3));
-      const particlesMaterial = new THREE.PointsMaterial({
-        size: 0.02,
-        color: 0x3b82f6,
+      // ============ LIGHTS ============
+      const ambient = new THREE.AmbientLight(0x222244, 0.3);
+      scene.add(ambient);
+
+      const keyLight = new THREE.DirectionalLight(0x3b82f6, 2);
+      keyLight.position.set(3, 5, 4);
+      keyLight.castShadow = true;
+      keyLight.shadow.mapSize.width = 2048;
+      keyLight.shadow.mapSize.height = 2048;
+      scene.add(keyLight);
+
+      const rimLight = new THREE.DirectionalLight(0x8b5cf6, 1.5);
+      rimLight.position.set(-3, 2, -2);
+      scene.add(rimLight);
+
+      const fillLight = new THREE.DirectionalLight(0xec4899, 0.5);
+      fillLight.position.set(0, -1, 3);
+      scene.add(fillLight);
+
+      const blueGlow = new THREE.PointLight(0x3b82f6, 0.5, 5);
+      blueGlow.position.set(0, 1.5, 1);
+      scene.add(blueGlow);
+
+      // ============ FLOOR GRID ============
+      const gridHelper = new THREE.GridHelper(10, 20, 0x3b82f6, 0x1a3a8a);
+      gridHelper.position.y = -0.5;
+      scene.add(gridHelper);
+
+      // Neon floor glow
+      const floorGlowGeometry = new THREE.PlaneGeometry(8, 8);
+      const floorGlowMaterial = new THREE.MeshBasicMaterial({
+        color: 0x0a0a2e,
         transparent: true,
-        opacity: 0.8,
-        blending: THREE.AdditiveBlending
+        opacity: 0.3,
+        side: THREE.DoubleSide
       });
-      const particles = new THREE.Points(particlesGeometry, particlesMaterial);
+      const floorGlow = new THREE.Mesh(floorGlowGeometry, floorGlowMaterial);
+      floorGlow.rotation.x = -Math.PI / 2;
+      floorGlow.position.y = -0.48;
+      scene.add(floorGlow);
+
+      // ============ PARTICLES ============
+      const particleCount = 3000;
+      const particleGeo = new THREE.BufferGeometry();
+      const positions = new Float32Array(particleCount * 3);
+      const sizes = new Float32Array(particleCount);
+      for (let i = 0; i < particleCount; i++) {
+        positions[i * 3] = (Math.random() - 0.5) * 20;
+        positions[i * 3 + 1] = (Math.random() - 0.5) * 10;
+        positions[i * 3 + 2] = (Math.random() - 0.5) * 20;
+        sizes[i] = Math.random() * 0.05 + 0.01;
+      }
+      particleGeo.setAttribute('position', new THREE.BufferAttribute(positions, 3));
+      particleGeo.setAttribute('size', new THREE.BufferAttribute(sizes, 1));
+
+      const particleMat = new THREE.PointsMaterial({
+        color: 0x3b82f6,
+        size: 0.03,
+        transparent: true,
+        opacity: 0.6,
+        blending: THREE.AdditiveBlending,
+        sizeAttenuation: true
+      });
+      const particles = new THREE.Points(particleGeo, particleMat);
       scene.add(particles);
 
-      // Main Orb
-      const orbGeometry = new THREE.SphereGeometry(0.8, 64, 64);
-      const orbMaterial = new THREE.MeshPhongMaterial({
+      // ============ BUILD ROBOT FROM PRIMITIVES ============
+      const robotGroup = new THREE.Group();
+
+      // --- Materials ---
+      const bodyMat = new THREE.MeshStandardMaterial({
+        color: 0x1a1a2e,
+        metalness: 0.9,
+        roughness: 0.1,
+        envMapIntensity: 1.0
+      });
+
+      const silverMat = new THREE.MeshStandardMaterial({
+        color: 0x8899aa,
+        metalness: 0.95,
+        roughness: 0.05,
+        envMapIntensity: 1.2
+      });
+
+      const glowMat = new THREE.MeshStandardMaterial({
         color: 0x3b82f6,
-        emissive: 0x1a3a8a,
+        emissive: 0x3b82f6,
+        emissiveIntensity: 0.3,
+        metalness: 0.5,
+        roughness: 0.2
+      });
+
+      const eyeMat = new THREE.MeshStandardMaterial({
+        color: 0x00ccff,
+        emissive: 0x00ccff,
+        emissiveIntensity: 1.0,
+        metalness: 0.1,
+        roughness: 0.1
+      });
+
+      const chestMat = new THREE.MeshStandardMaterial({
+        color: 0x3b82f6,
+        emissive: 0x3b82f6,
         emissiveIntensity: 0.5,
-        shininess: 100,
+        metalness: 0.3,
+        roughness: 0.2,
         transparent: true,
         opacity: 0.9
       });
-      const orb = new THREE.Mesh(orbGeometry, orbMaterial);
-      scene.add(orb);
 
-      // Orb glow ring
-      const ringGeometry = new THREE.TorusGeometry(1, 0.02, 16, 100);
-      const ringMaterial = new THREE.MeshBasicMaterial({
-        color: 0x8b5cf6,
+      // --- Body ---
+      const torso = new THREE.Mesh(new THREE.BoxGeometry(0.8, 1.2, 0.5), bodyMat);
+      torso.position.y = 1.2;
+      torso.castShadow = true;
+      robotGroup.add(torso);
+
+      // Chest plate
+      const chest = new THREE.Mesh(new THREE.BoxGeometry(0.6, 0.5, 0.15), chestMat);
+      chest.position.set(0, 1.4, 0.35);
+      robotGroup.add(chest);
+
+      // Chest hologram ring
+      const ringGeo = new THREE.TorusGeometry(0.3, 0.02, 16, 32);
+      const ringMat = new THREE.MeshBasicMaterial({
+        color: 0x3b82f6,
         transparent: true,
-        opacity: 0.6
+        opacity: 0.8
       });
-      const ring = new THREE.Mesh(ringGeometry, ringMaterial);
-      ring.rotation.x = Math.PI / 2;
-      scene.add(ring);
+      const chestRing = new THREE.Mesh(ringGeo, ringMat);
+      chestRing.position.set(0, 1.4, 0.45);
+      robotGroup.add(chestRing);
 
-      // Orb glow ring 2
-      const ring2Geometry = new THREE.TorusGeometry(1.2, 0.01, 16, 100);
-      const ring2Material = new THREE.MeshBasicMaterial({
-        color: 0xec4899,
+      // Chest core glow
+      const coreGeo = new THREE.SphereGeometry(0.1, 16, 16);
+      const coreMat = new THREE.MeshBasicMaterial({
+        color: 0x3b82f6,
         transparent: true,
-        opacity: 0.4
+        opacity: 0.9
       });
-      const ring2 = new THREE.Mesh(ring2Geometry, ring2Material);
-      ring2.rotation.z = Math.PI / 3;
-      scene.add(ring2);
+      const core = new THREE.Mesh(coreGeo, coreMat);
+      core.position.set(0, 1.4, 0.5);
+      robotGroup.add(core);
 
-      // Lights
-      const ambientLight = new THREE.AmbientLight(0x404060);
-      scene.add(ambientLight);
+      // --- Head ---
+      const head = new THREE.Mesh(new THREE.SphereGeometry(0.4, 32, 32), bodyMat);
+      head.position.y = 2.0;
+      head.castShadow = true;
+      robotGroup.add(head);
 
-      const light1 = new THREE.PointLight(0x3b82f6, 2, 5);
-      light1.position.set(2, 1, 2);
-      scene.add(light1);
+      // Helmet visor
+      const visor = new THREE.Mesh(new THREE.BoxGeometry(0.5, 0.2, 0.1), glowMat);
+      visor.position.set(0, 2.05, 0.4);
+      robotGroup.add(visor);
 
-      const light2 = new THREE.PointLight(0x8b5cf6, 1, 5);
-      light2.position.set(-2, -1, 2);
-      scene.add(light2);
+      // Eyes
+      const eyeGeo = new THREE.SphereGeometry(0.06, 16, 16);
+      const leftEye = new THREE.Mesh(eyeGeo, eyeMat);
+      leftEye.position.set(-0.15, 2.1, 0.4);
+      robotGroup.add(leftEye);
 
-      const light3 = new THREE.PointLight(0xec4899, 1, 5);
-      light3.position.set(0, 2, -2);
-      scene.add(light3);
+      const rightEye = new THREE.Mesh(eyeGeo, eyeMat);
+      rightEye.position.set(0.15, 2.1, 0.4);
+      robotGroup.add(rightEye);
 
-      camera.position.z = 3;
+      // Eye glow rings
+      const eyeRingGeo = new THREE.TorusGeometry(0.08, 0.02, 8, 16);
+      const eyeRingMat = new THREE.MeshBasicMaterial({
+        color: 0x00ccff,
+        transparent: true,
+        opacity: 0.5
+      });
+      const leftEyeRing = new THREE.Mesh(eyeRingGeo, eyeRingMat);
+      leftEyeRing.position.copy(leftEye.position);
+      robotGroup.add(leftEyeRing);
 
+      const rightEyeRing = new THREE.Mesh(eyeRingGeo, eyeRingMat);
+      rightEyeRing.position.copy(rightEye.position);
+      robotGroup.add(rightEyeRing);
+
+      // --- Neck ---
+      const neck = new THREE.Mesh(new THREE.CylinderGeometry(0.15, 0.2, 0.2, 8), silverMat);
+      neck.position.y = 1.8;
+      robotGroup.add(neck);
+
+      // --- Shoulders ---
+      const shoulderMat = new THREE.MeshStandardMaterial({
+        color: 0x2a2a3e,
+        metalness: 0.8,
+        roughness: 0.2
+      });
+
+      const leftShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), shoulderMat);
+      leftShoulder.position.set(-0.55, 1.7, 0);
+      robotGroup.add(leftShoulder);
+
+      const rightShoulder = new THREE.Mesh(new THREE.SphereGeometry(0.2, 16, 16), shoulderMat);
+      rightShoulder.position.set(0.55, 1.7, 0);
+      robotGroup.add(rightShoulder);
+
+      // --- Arms ---
+      const armMat = new THREE.MeshStandardMaterial({
+        color: 0x222233,
+        metalness: 0.85,
+        roughness: 0.15
+      });
+
+      const leftArmGroup = new THREE.Group();
+      const leftUpper = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.5, 8), armMat);
+      leftUpper.position.y = -0.25;
+      leftArmGroup.add(leftUpper);
+
+      const leftForearm = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.4, 8), armMat);
+      leftForearm.position.y = -0.55;
+      leftArmGroup.add(leftForearm);
+
+      leftArmGroup.position.set(-0.6, 1.45, 0);
+      leftArmGroup.rotation.z = 0.3;
+      leftArmGroup.rotation.x = -0.2;
+      robotGroup.add(leftArmGroup);
+
+      const rightArmGroup = new THREE.Group();
+      const rightUpper = new THREE.Mesh(new THREE.CylinderGeometry(0.1, 0.12, 0.5, 8), armMat);
+      rightUpper.position.y = -0.25;
+      rightArmGroup.add(rightUpper);
+
+      const rightForearm = new THREE.Mesh(new THREE.CylinderGeometry(0.08, 0.1, 0.4, 8), armMat);
+      rightForearm.position.y = -0.55;
+      rightArmGroup.add(rightForearm);
+
+      rightArmGroup.position.set(0.6, 1.45, 0);
+      rightArmGroup.rotation.z = -0.3;
+      rightArmGroup.rotation.x = 0.2;
+      robotGroup.add(rightArmGroup);
+
+      // Hands
+      const handMat = new THREE.MeshStandardMaterial({
+        color: 0x8899aa,
+        metalness: 0.9,
+        roughness: 0.1
+      });
+      const handGeo = new THREE.SphereGeometry(0.08, 8, 8);
+
+      const leftHand = new THREE.Mesh(handGeo, handMat);
+      leftHand.position.set(-0.6, 0.85, 0);
+      robotGroup.add(leftHand);
+
+      const rightHand = new THREE.Mesh(handGeo, handMat);
+      rightHand.position.set(0.6, 0.85, 0);
+      robotGroup.add(rightHand);
+
+      // --- Legs ---
+      const legMat = new THREE.MeshStandardMaterial({
+        color: 0x1a1a2e,
+        metalness: 0.8,
+        roughness: 0.2
+      });
+
+      const leftLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 0.6, 8), legMat);
+      leftLeg.position.set(-0.25, 0.5, 0);
+      leftLeg.castShadow = true;
+      robotGroup.add(leftLeg);
+
+      const rightLeg = new THREE.Mesh(new THREE.CylinderGeometry(0.12, 0.15, 0.6, 8), legMat);
+      rightLeg.position.set(0.25, 0.5, 0);
+      rightLeg.castShadow = true;
+      robotGroup.add(rightLeg);
+
+      // Feet
+      const footMat = new THREE.MeshStandardMaterial({
+        color: 0x2a2a3e,
+        metalness: 0.7,
+        roughness: 0.3
+      });
+      const footGeo = new THREE.BoxGeometry(0.15, 0.05, 0.2);
+
+      const leftFoot = new THREE.Mesh(footGeo, footMat);
+      leftFoot.position.set(-0.25, 0.15, 0.05);
+      robotGroup.add(leftFoot);
+
+      const rightFoot = new THREE.Mesh(footGeo, footMat);
+      rightFoot.position.set(0.25, 0.15, 0.05);
+      robotGroup.add(rightFoot);
+
+      // --- Neon Strips ---
+      const stripMat = new THREE.MeshBasicMaterial({
+        color: 0x3b82f6,
+        transparent: true,
+        opacity: 0.8
+      });
+
+      const vPoints = [
+        new THREE.Vector3(-0.2, 0, 0),
+        new THREE.Vector3(0, 0.15, 0),
+        new THREE.Vector3(0.2, 0, 0)
+      ];
+      const vCurve = new THREE.CatmullRomCurve3(vPoints);
+      const vGeo = new THREE.TubeGeometry(vCurve, 20, 0.015, 8, false);
+      const vMesh = new THREE.Mesh(vGeo, stripMat);
+      vMesh.position.set(0, 1.2, 0.4);
+      robotGroup.add(vMesh);
+
+      const lineMat = new THREE.LineBasicMaterial({ color: 0x3b82f6 });
+
+      for (let side = -1; side <= 1; side += 2) {
+        const points = [];
+        for (let i = 0; i <= 10; i++) {
+          const t = i / 10;
+          points.push(new THREE.Vector3(
+            side * (0.45 + t * 0.15),
+            1.6 + t * 0.3,
+            0
+          ));
+        }
+        const curve = new THREE.CatmullRomCurve3(points);
+        const curvePoints = curve.getPoints(20);
+        const geometry = new THREE.BufferGeometry().setFromPoints(curvePoints);
+        const line = new THREE.Line(geometry, lineMat);
+        robotGroup.add(line);
+      }
+
+      // --- Holographic Display Panels ---
+      const panelMat = new THREE.MeshBasicMaterial({
+        color: 0x3b82f6,
+        transparent: true,
+        opacity: 0.1,
+        wireframe: true,
+        side: THREE.DoubleSide
+      });
+
+      const panelPositions = [
+        { x: -0.8, y: 1.8, z: -0.5, rx: 0, ry: 0.5 },
+        { x: 0.8, y: 1.4, z: -0.5, rx: 0, ry: -0.5 },
+        { x: 0, y: 2.6, z: -0.5, rx: 0.3, ry: 0 }
+      ];
+
+      panelPositions.forEach(pos => {
+        const panel = new THREE.Mesh(new THREE.PlaneGeometry(0.4, 0.3), panelMat);
+        panel.position.set(pos.x, pos.y, pos.z);
+        panel.rotation.x = pos.rx || 0;
+        panel.rotation.y = pos.ry || 0;
+        robotGroup.add(panel);
+
+        const innerMat = new THREE.MeshBasicMaterial({
+          color: 0x3b82f6,
+          transparent: true,
+          opacity: 0.05,
+          side: THREE.DoubleSide
+        });
+        const inner = new THREE.Mesh(new THREE.PlaneGeometry(0.35, 0.25), innerMat);
+        inner.position.copy(panel.position);
+        inner.rotation.copy(panel.rotation);
+        robotGroup.add(inner);
+      });
+
+      // --- Position robot ---
+      robotGroup.position.y = 0.5;
+      scene.add(robotGroup);
+
+      // ============ ANIMATION STATE ============
+      const animState = {
+        isSpeaking: false,
+        isListening: false,
+        isThinking: false,
+        eyeColor: new THREE.Color(0x00ccff),
+        targetEyeColor: new THREE.Color(0x00ccff),
+        mouthOpen: 0,
+        targetMouthOpen: 0,
+        headTilt: 0,
+        targetHeadTilt: 0,
+        breathing: 0,
+        armSwing: 0,
+        chestPulse: 0,
+        blinkTimer: 0,
+        isBlinking: false,
+        walkCycle: 0,
+        greetingDone: false
+      };
+
+      // References
+      const eyes = [leftEye, rightEye];
+      const eyeRings = [leftEyeRing, rightEyeRing];
+      const chestRingRef = chestRing;
+      const coreRef = core;
+      const leftArmRef = leftArmGroup;
+      const rightArmRef = rightArmGroup;
+
+      // ============ MOUSE TRACKING ============
       let mouseX = 0;
       let mouseY = 0;
+      let targetMouseX = 0;
+      let targetMouseY = 0;
 
       document.addEventListener('mousemove', (e) => {
-        mouseX = (e.clientX / window.innerWidth - 0.5) * 2;
-        mouseY = (e.clientY / window.innerHeight - 0.5) * 2;
+        targetMouseX = (e.clientX / window.innerWidth - 0.5) * 2;
+        targetMouseY = (e.clientY / window.innerHeight - 0.5) * 2;
       });
 
+      document.addEventListener('touchmove', (e) => {
+        const touch = e.touches[0];
+        targetMouseX = (touch.clientX / window.innerWidth - 0.5) * 2;
+        targetMouseY = (touch.clientY / window.innerHeight - 0.5) * 2;
+      });
+
+      // ============ PUBLIC METHODS ============
+      window.robot = {
+        speak() {
+          animState.isSpeaking = true;
+          animState.isListening = false;
+          animState.isThinking = false;
+          animState.targetEyeColor.setHex(0x06b6d4);
+          animState.targetMouthOpen = 0.3;
+          document.getElementById('status-dot')?.className = 'status-dot status-speaking';
+        },
+        listen() {
+          animState.isListening = true;
+          animState.isSpeaking = false;
+          animState.isThinking = false;
+          animState.targetEyeColor.setHex(0x22c55e);
+          animState.targetMouthOpen = 0.1;
+          document.getElementById('status-dot')?.className = 'status-dot status-listening';
+        },
+        think() {
+          animState.isThinking = true;
+          animState.isListening = false;
+          animState.isSpeaking = false;
+          animState.targetEyeColor.setHex(0x8b5cf6);
+          animState.targetMouthOpen = 0;
+          animState.targetHeadTilt = 0.2;
+          document.getElementById('status-dot')?.className = 'status-dot status-thinking';
+        },
+        idle() {
+          animState.isSpeaking = false;
+          animState.isListening = false;
+          animState.isThinking = false;
+          animState.targetEyeColor.setHex(0x3b82f6);
+          animState.targetMouthOpen = 0;
+          animState.targetHeadTilt = 0;
+          document.getElementById('status-dot')?.className = 'status-dot status-idle';
+        },
+        error() {
+          animState.targetEyeColor.setHex(0xef4444);
+          document.getElementById('status-dot')?.className = 'status-dot status-error';
+          setTimeout(() => window.robot.idle(), 2000);
+        },
+        greet() {
+          GSAP.to(robotGroup.position, {
+            x: 0,
+            duration: 1.5,
+            ease: 'power2.out',
+            onComplete: () => {
+              animState.greetingDone = true;
+              window.robot.idle();
+            }
+          });
+          GSAP.to(rightArmRef.rotation, {
+            z: -0.8,
+            duration: 0.5,
+            ease: 'power2.out',
+            yoyo: true,
+            repeat: 2
+          });
+        }
+      };
+
+      window.robot.idle();
+
+      setTimeout(() => {
+        robotGroup.position.x = -3;
+        window.robot.greet();
+      }, 1000);
+
+      // ============ ANIMATION LOOP ============
       function animate() {
         requestAnimationFrame(animate);
 
-        // Rotate particles
+        const time = Date.now() * 0.001;
+
+        mouseX += (targetMouseX - mouseX) * 0.05;
+        mouseY += (targetMouseY - mouseY) * 0.05;
+
+        robotGroup.rotation.y = mouseX * 0.3;
+        robotGroup.rotation.x = -mouseY * 0.1;
+
+        // Breathing
+        animState.breathing = Math.sin(time * 1.2) * 0.02;
+        torso.scale.y = 1 + animState.breathing;
+        torso.position.y = 1.2 + animState.breathing * 0.5;
+
+        // Eye color transition
+        const currentColor = animState.eyeColor;
+        const targetColor = animState.targetEyeColor;
+        currentColor.lerp(targetColor, 0.05);
+
+        eyes.forEach(eye => {
+          eye.material.color.copy(currentColor);
+          eye.material.emissive.copy(currentColor);
+        });
+        eyeRings.forEach(ring => {
+          ring.material.color.copy(currentColor);
+        });
+
+        // Chest pulse
+        const pulse = 0.5 + Math.sin(time * 2) * 0.3;
+        chestRingRef.scale.set(pulse, pulse, pulse);
+        coreRef.material.opacity = 0.5 + Math.sin(time * 2) * 0.4;
+
+        // Blink
+        animState.blinkTimer += 0.01;
+        if (animState.blinkTimer > 3 + Math.random() * 2) {
+          animState.isBlinking = true;
+          animState.blinkTimer = 0;
+        }
+        if (animState.isBlinking) {
+          const blinkProgress = (animState.blinkTimer % 0.15) / 0.15;
+          const scale = blinkProgress < 0.5 ? 1 - blinkProgress * 2 : 1;
+          eyes.forEach(eye => {
+            eye.scale.y = Math.max(scale, 0.05);
+          });
+          if (animState.blinkTimer > 0.3) {
+            animState.isBlinking = false;
+            eyes.forEach(eye => {
+              eye.scale.y = 1;
+            });
+          }
+        }
+
+        // Arm swing
+        if (animState.isSpeaking || animState.isThinking) {
+          const swing = Math.sin(time * 2) * 0.3;
+          leftArmRef.rotation.x = -0.2 + swing * 0.1;
+          rightArmRef.rotation.x = 0.2 - swing * 0.1;
+        }
+
+        // Head tilt when thinking
+        const headTilt = animState.targetHeadTilt * Math.sin(time * 0.5);
+        head.rotation.z = headTilt * 0.2;
+
+        // Particles rotation
         particles.rotation.y += 0.0005;
-
-        // Orb animation
-        orb.rotation.x += 0.005;
-        orb.rotation.y += 0.01;
-
-        // Ring animations
-        ring.rotation.x += 0.01;
-        ring.rotation.z += 0.005;
-        ring2.rotation.x += 0.005;
-        ring2.rotation.y += 0.01;
-
-        // Follow mouse
-        orb.position.x += (mouseX * 0.3 - orb.position.x) * 0.05;
-        orb.position.y += (-mouseY * 0.3 - orb.position.y) * 0.05;
-        ring.position.copy(orb.position);
-        ring2.position.copy(orb.position);
-
-        // Pulse
-        const scale = 1 + Math.sin(Date.now() * 0.002) * 0.03;
-        orb.scale.set(scale, scale, scale);
 
         renderer.render(scene, camera);
       }
@@ -537,14 +933,12 @@
         currentUtterance: null,
         speechSynthesis: window.speechSynthesis,
         socket: null,
-        aiModels: ['gpt-3.5-turbo', 'gpt-4', 'gemini-pro', 'claude', 'deepseek']
+        aiModels: ['gpt-3.5-turbo', 'gpt-4']
       };
 
       // ============ API ============
       const API = {
-        base: window.location.hostname === 'localhost' ?
-          'http://localhost:10000/api' :
-          'https://your-backend.onrender.com/api',
+        base: CONFIG.API_URL,
 
         async request(endpoint, options = {}) {
           const headers = {
@@ -642,7 +1036,7 @@
       // ============ AUTH PAGE ============
       function renderAuth() {
         return `
-          <div class="min-h-screen flex items-center justify-center p-4 relative" style="
+          <div class="min-h-screen flex items-center justify-center p-4 relative z-10" style="
             background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%);
           ">
             <div class="glass rounded-2xl p-8 w-full max-w-md relative z-10 fade-in">
@@ -650,6 +1044,10 @@
                 <div class="text-6xl mb-3 float">🤖</div>
                 <h1 class="text-4xl font-bold gradient-text neon-glow">J.A.R.V.I.S.</h1>
                 <p class="text-gray-400 mt-2">Premium AI Assistant</p>
+                <div class="flex items-center justify-center gap-2 mt-3">
+                  <span class="status-dot status-idle" id="auth-status-dot"></span>
+                  <span class="text-xs text-gray-500">Online</span>
+                </div>
               </div>
 
               <form id="auth-form" class="space-y-4">
@@ -672,6 +1070,10 @@
                 <span id="auth-toggle-text">Don't have an account?</span>
                 <button id="auth-toggle" class="text-blue-400 hover:underline ml-2">Sign Up</button>
               </p>
+
+              <div class="mt-6 text-center text-xs text-gray-500">
+                <span>🔗 Connected to: ${CONFIG.BACKEND_URL}</span>
+              </div>
             </div>
           </div>
         `;
@@ -710,7 +1112,7 @@
             localStorage.setItem('jarvis_token', data.token);
             render();
             showToast(isLogin ? 'Welcome back! 👋' : 'Account created! 🎉', 'success');
-            initSocket();
+            if (window.robot) window.robot.idle();
           } catch (error) {
             showToast(error.message || 'Authentication failed', 'error');
             btn.disabled = false;
@@ -734,6 +1136,7 @@
                   </button>
                   <h2 class="text-lg font-semibold text-white capitalize">${state.currentPage}</h2>
                   <span class="text-xs text-gray-500 bg-white/5 px-2 py-0.5 rounded-full">Premium</span>
+                  <span class="status-dot status-idle" id="status-dot"></span>
                 </div>
                 <div class="flex items-center gap-3">
                   <button id="notifications-btn" class="text-gray-400 hover:text-white transition relative">
@@ -797,6 +1200,9 @@
                 <i class="fa-solid fa-right-from-bracket w-5 text-center"></i>
                 <span class="hidden md:inline">Logout</span>
               </button>
+              <div class="text-center text-xs text-gray-600 mt-2">
+                🔗 ${CONFIG.BACKEND_URL.replace('https://', '').replace('http://', '').substring(0, 20)}...
+              </div>
             </div>
           </div>
         `;
@@ -1149,11 +1555,14 @@
                   <option value="nova">Nova</option>
                   <option value="shimmer">Shimmer</option>
                 </select>
-                <div class="mt-2">
-                  <label class="text-gray-400 text-sm">Wake Word</label>
-                  <input type="text" id="settings-wake" value="${state.user?.preferences?.wakeWord || 'Jarvis'}"
-                    class="w-full mt-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-blue-500 focus:outline-none" />
-                </div>
+              </div>
+
+              <div class="glass rounded-lg p-4">
+                <h3 class="text-white font-semibold mb-2">Backend</h3>
+                <div class="text-sm text-gray-400">${CONFIG.BACKEND_URL}</div>
+                <button id="test-connection" class="mt-2 px-4 py-1 rounded bg-blue-500/20 text-blue-400 text-sm hover:bg-blue-500/30 transition">
+                  <i class="fa-solid fa-plug"></i> Test Connection
+                </button>
               </div>
 
               <button id="save-settings" class="px-6 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition flex items-center gap-2">
@@ -1277,6 +1686,7 @@
         const userMessage = { role: 'user', content: text, timestamp: Date.now() };
         state.messages.push(userMessage);
         state.isLoading = true;
+        if (window.robot) window.robot.think();
         render();
 
         try {
@@ -1294,9 +1704,12 @@
             })
           });
 
+          if (!response.ok) throw new Error('Stream failed');
+
           const reader = response.body.getReader();
           const decoder = new TextDecoder();
           let fullContent = '';
+          let firstChunk = true;
 
           while (true) {
             const { done, value } = await reader.read();
@@ -1312,8 +1725,11 @@
                 try {
                   const parsed = JSON.parse(data);
                   if (parsed.content) {
+                    if (firstChunk) {
+                      if (window.robot) window.robot.speak();
+                      firstChunk = false;
+                    }
                     fullContent += parsed.content;
-                    // Update the last message in real-time
                     const lastMsg = state.messages[state.messages.length - 1];
                     if (lastMsg && lastMsg.role === 'assistant') {
                       lastMsg.content = fullContent;
@@ -1324,25 +1740,21 @@
                     const end = document.getElementById('chat-end');
                     if (end) end.scrollIntoView({ behavior: 'smooth' });
                   }
-                } catch (e) {
-                  // Skip invalid JSON
-                }
+                } catch (e) {}
               }
             }
           }
 
-          // Save final message
-          if (state.messages.length > 0 && state.messages[state.messages.length - 1].role === 'assistant') {
-            // Text-to-speech
-            if (state.voiceEnabled) {
-              speakText(fullContent);
-            }
+          if (state.voiceEnabled && fullContent) {
+            speakText(fullContent);
           }
 
           await loadChats();
+          if (window.robot) window.robot.idle();
         } catch (error) {
-          state.messages.push({ role: 'assistant', content: `Error: ${error.message}`, timestamp: Date.now() });
+          state.messages.push({ role: 'assistant', content: `⚠️ Error: ${error.message}`, timestamp: Date.now() });
           showToast('Failed to get response', 'error');
+          if (window.robot) window.robot.error();
         }
 
         state.isLoading = false;
@@ -1362,6 +1774,16 @@
         utterance.pitch = 1.1;
         utterance.voice = state.speechSynthesis.getVoices().find(v => v.lang.includes('en')) || null;
 
+        utterance.onstart = () => {
+          if (window.robot) window.robot.speak();
+        };
+        utterance.onend = () => {
+          if (window.robot) window.robot.idle();
+        };
+        utterance.onerror = () => {
+          if (window.robot) window.robot.idle();
+        };
+
         state.currentUtterance = utterance;
         state.speechSynthesis.speak(utterance);
       }
@@ -1373,6 +1795,7 @@
         }
 
         state.isRecording = true;
+        if (window.robot) window.robot.listen();
         render();
 
         const recognition = new webkitSpeechRecognition();
@@ -1398,11 +1821,13 @@
 
         recognition.onend = () => {
           state.isRecording = false;
+          if (window.robot) window.robot.idle();
           render();
         };
 
         recognition.onerror = () => {
           state.isRecording = false;
+          if (window.robot) window.robot.error();
           render();
           showToast('Voice recognition error', 'error');
         };
@@ -1414,7 +1839,7 @@
 
       async function loadData() {
         try {
-          await Promise.all([loadChats(), loadNotes(), loadTasks(), loadFiles(), loadReminders()]);
+          await Promise.all([loadChats(), loadNotes(), loadTasks(), loadFiles(), loadReminders(), loadWeather()]);
         } catch (error) {
           // Silently fail
         }
@@ -1462,11 +1887,15 @@
         }
       }
 
-      // ============ SOCKET.IO ============
-
-      function initSocket() {
-        // Socket.IO connection would go here
-        // For now, we'll use the existing API
+      function testConnection() {
+        fetch(`${API.base}/health`)
+          .then(res => res.json())
+          .then(data => {
+            showToast(`✅ Backend connected! Status: ${data.status}`, 'success');
+          })
+          .catch(err => {
+            showToast(`❌ Connection failed: ${err.message}`, 'error');
+          });
       }
 
       // ============ CLOCK ============
@@ -1551,6 +1980,7 @@
             if (state.currentUtterance) {
               state.speechSynthesis.cancel(state.currentUtterance);
             }
+            if (window.robot) window.robot.idle();
             render();
             showToast('Generation stopped', 'warning');
           });
@@ -1599,6 +2029,7 @@
 
           state.toolLoading = true;
           state.toolResult = '';
+          if (window.robot) window.robot.think();
           render();
 
           try {
@@ -1616,6 +2047,7 @@
             if (!endpoint) {
               state.toolResult = 'Tool not available';
               state.toolLoading = false;
+              if (window.robot) window.robot.idle();
               render();
               return;
             }
@@ -1629,12 +2061,15 @@
             });
 
             state.toolResult = data.code || data.url || data.summary || data.translated ||
-              data.fixed || data.email || data.AbstractText || 'Done!';
+              data.fixed || data.email || data.result || 'Done!';
+            if (window.robot) window.robot.speak();
           } catch (error) {
             state.toolResult = `Error: ${error.message}`;
+            if (window.robot) window.robot.error();
           }
 
           state.toolLoading = false;
+          setTimeout(() => { if (window.robot) window.robot.idle(); }, 1000);
           render();
         });
 
@@ -1747,15 +2182,13 @@
         document.getElementById('save-settings')?.addEventListener('click', async () => {
           const model = document.getElementById('settings-model')?.value;
           const voice = document.getElementById('settings-voice')?.value;
-          const wakeWord = document.getElementById('settings-wake')?.value;
 
           try {
             await API.put('/user/profile', {
               preferences: {
                 ...state.user?.preferences,
                 aiModel: model,
-                voice: voice,
-                wakeWord: wakeWord
+                voice: voice
               }
             });
             showToast('Settings saved!', 'success');
@@ -1763,6 +2196,9 @@
             showToast('Failed to save settings', 'error');
           }
         });
+
+        // Test Connection
+        document.getElementById('test-connection')?.addEventListener('click', testConnection);
 
         // Notifications
         document.getElementById('notifications-btn')?.addEventListener('click', () => {
@@ -1790,9 +2226,8 @@
             state.user = user;
             render();
             setInterval(updateClock, 1000);
-            loadWeather();
             loadData();
-            initSocket();
+            if (window.robot) window.robot.idle();
           })
           .catch(() => {
             state.token = null;
@@ -1804,10 +2239,11 @@
       }
 
       // Expose for debugging
-      window.__JARVIS = { state, API, render, sendChatMessage, showToast };
+      window.__JARVIS = { state, API, render, sendChatMessage, showToast, CONFIG };
 
       console.log('🤖 J.A.R.V.I.S. Premium v2.0');
-      console.log('📡 Backend:', API.base);
+      console.log(`📡 Backend: ${CONFIG.BACKEND_URL}`);
+      console.log(`📡 API: ${CONFIG.API_URL}`);
       console.log('💡 Press Ctrl+K to focus chat');
 
     })();
