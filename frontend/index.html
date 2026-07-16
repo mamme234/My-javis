@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>J.A.R.V.I.S. - AI Assistant</title>
+  <title>J.A.R.V.I.S. PRO - AI Assistant</title>
 
   <!-- Tailwind CSS -->
   <script src="https://cdn.tailwindcss.com"></script>
@@ -12,7 +12,7 @@
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" />
 
   <!-- Google Fonts -->
-  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&family=Orbitron:wght@400;700;900&display=swap" rel="stylesheet" />
 
   <style>
     * {
@@ -26,9 +26,14 @@
       background: #0a0a0f;
       min-height: 100vh;
       color: #fff;
+      overflow-x: hidden;
     }
 
-    /* Glassmorphism */
+    #root {
+      min-height: 100vh;
+    }
+
+    /* ============ GLASSMORPHISM ============ */
     .glass {
       background: rgba(255, 255, 255, 0.05);
       backdrop-filter: blur(20px);
@@ -36,6 +41,21 @@
       border: 1px solid rgba(255, 255, 255, 0.08);
     }
 
+    .glass-dark {
+      background: rgba(0, 0, 0, 0.6);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .glass-light {
+      background: rgba(255, 255, 255, 0.1);
+      backdrop-filter: blur(20px);
+      -webkit-backdrop-filter: blur(20px);
+      border: 1px solid rgba(255, 255, 255, 0.15);
+    }
+
+    /* ============ GRADIENT ============ */
     .gradient-text {
       background: linear-gradient(135deg, #3b82f6, #8b5cf6, #ec4899);
       -webkit-background-clip: text;
@@ -43,31 +63,119 @@
       background-clip: text;
     }
 
+    .gradient-text-gold {
+      background: linear-gradient(135deg, #f59e0b, #f97316, #ef4444);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+
+    .neon-glow {
+      text-shadow: 0 0 20px rgba(59, 130, 246, 0.5), 0 0 60px rgba(59, 130, 246, 0.2);
+    }
+
+    .neon-glow-gold {
+      text-shadow: 0 0 20px rgba(245, 158, 11, 0.5), 0 0 60px rgba(245, 158, 11, 0.2);
+    }
+
+    /* ============ LOGO ============ */
+    @keyframes logoFloat {
+      0%, 100% { transform: translateY(0px) scale(1); }
+      50% { transform: translateY(-10px) scale(1.02); }
+    }
+    .logo-float {
+      animation: logoFloat 4s ease-in-out infinite;
+    }
+
+    @keyframes logoPulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.7; }
+    }
+    .logo-pulse {
+      animation: logoPulse 3s ease-in-out infinite;
+    }
+
+    @keyframes spin-slow {
+      from { transform: rotate(0deg); }
+      to { transform: rotate(360deg); }
+    }
+    .spin-slow {
+      animation: spin-slow 20s linear infinite;
+    }
+
+    /* ============ CHAT ============ */
     .chat-bubble-user {
       background: linear-gradient(135deg, #3b82f6, #6366f1);
       color: white;
       border-radius: 20px 20px 4px 20px;
+      box-shadow: 0 4px 30px rgba(59, 130, 246, 0.3);
     }
 
     .chat-bubble-ai {
       background: rgba(255, 255, 255, 0.06);
       border: 1px solid rgba(255, 255, 255, 0.06);
       border-radius: 20px 20px 20px 4px;
+      backdrop-filter: blur(10px);
     }
 
-    /* Scrollbar */
-    ::-webkit-scrollbar {
-      width: 4px;
+    /* ============ SIDEBAR ============ */
+    .sidebar-item {
+      transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+      border-radius: 12px;
+      padding: 10px 14px;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      cursor: pointer;
+      color: #9ca3af;
+      position: relative;
+      overflow: hidden;
     }
-    ::-webkit-scrollbar-track {
-      background: transparent;
+
+    .sidebar-item:hover {
+      background: rgba(255, 255, 255, 0.06);
+      color: white;
+      transform: translateX(4px);
     }
-    ::-webkit-scrollbar-thumb {
+
+    .sidebar-item.active {
+      background: rgba(59, 130, 246, 0.15);
+      color: #3b82f6;
+    }
+
+    .sidebar-item.active::before {
+      content: '';
+      position: absolute;
+      left: 0;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 3px;
+      height: 60%;
       background: #3b82f6;
-      border-radius: 2px;
+      border-radius: 0 3px 3px 0;
     }
 
-    /* Animations */
+    /* ============ STATUS ============ */
+    .status-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 50%;
+      display: inline-block;
+      transition: all 0.3s;
+    }
+    .status-online { background: #22c55e; box-shadow: 0 0 15px #22c55e; }
+    .status-offline { background: #ef4444; box-shadow: 0 0 15px #ef4444; }
+    .status-away { background: #f59e0b; box-shadow: 0 0 15px #f59e0b; }
+
+    /* ============ SCROLLBAR ============ */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: transparent; }
+    ::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 2px; }
+    .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+    .custom-scrollbar::-webkit-scrollbar-track { background: transparent; }
+    .custom-scrollbar::-webkit-scrollbar-thumb { background: #3b82f6; border-radius: 2px; }
+
+    /* ============ ANIMATIONS ============ */
     @keyframes float {
       0%, 100% { transform: translateY(0px); }
       50% { transform: translateY(-10px); }
@@ -95,43 +203,19 @@
     }
     .slide-in { animation: slide-in 0.3s ease-out; }
 
-    .sidebar-item {
-      transition: all 0.3s ease;
-      border-radius: 12px;
-      padding: 10px 14px;
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      cursor: pointer;
-      color: #9ca3af;
+    @keyframes fade-in {
+      from { opacity: 0; transform: scale(0.95); }
+      to { opacity: 1; transform: scale(1); }
     }
+    .fade-in { animation: fade-in 0.3s ease-out; }
 
-    .sidebar-item:hover {
-      background: rgba(255, 255, 255, 0.06);
-      color: white;
+    @keyframes glow-pulse {
+      0%, 100% { box-shadow: 0 0 20px rgba(59, 130, 246, 0.3); }
+      50% { box-shadow: 0 0 60px rgba(59, 130, 246, 0.6); }
     }
+    .glow-pulse { animation: glow-pulse 2s ease-in-out infinite; }
 
-    .sidebar-item.active {
-      background: rgba(59, 130, 246, 0.15);
-      color: #3b82f6;
-    }
-
-    .sidebar-item.active::before {
-      content: '';
-      position: absolute;
-      left: 0;
-      top: 50%;
-      transform: translateY(-50%);
-      width: 3px;
-      height: 60%;
-      background: #3b82f6;
-      border-radius: 0 3px 3px 0;
-    }
-
-    .sidebar-item {
-      position: relative;
-    }
-
+    /* ============ SPINNER ============ */
     .spinner {
       width: 40px;
       height: 40px;
@@ -144,6 +228,7 @@
       to { transform: rotate(360deg); }
     }
 
+    /* ============ TOAST ============ */
     .toast {
       transition: all 0.3s ease;
       transform: translateX(0);
@@ -154,11 +239,7 @@
       transform: translateX(100px);
     }
 
-    @media (max-width: 768px) {
-      .sidebar { width: 64px; }
-      .sidebar-label { display: none !important; }
-    }
-
+    /* ============ MARKDOWN ============ */
     .markdown pre {
       background: rgba(0, 0, 0, 0.4);
       padding: 1rem;
@@ -172,15 +253,88 @@
     .markdown ul, .markdown ol { padding-left: 1.5rem; margin: 0.5rem 0; }
     .markdown li { margin: 0.25rem 0; }
     .markdown blockquote { border-left: 3px solid #3b82f6; padding-left: 1rem; color: #9ca3af; margin: 0.5rem 0; }
+
+    /* ============ RESPONSIVE ============ */
+    @media (max-width: 768px) {
+      .sidebar { width: 64px; }
+      .sidebar-label { display: none !important; }
+      .mobile-hide { display: none !important; }
+    }
+
+    @media (max-width: 480px) {
+      .text-3xl { font-size: 1.5rem; }
+      .p-6 { padding: 1rem; }
+    }
+
+    /* ============ BADGE ============ */
+    .badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      width: 18px;
+      height: 18px;
+      background: #ef4444;
+      border-radius: 50%;
+      font-size: 10px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-weight: 600;
+    }
+
+    /* ============ PRO FEATURES ============ */
+    .pro-badge {
+      background: linear-gradient(135deg, #f59e0b, #f97316);
+      padding: 2px 10px;
+      border-radius: 20px;
+      font-size: 10px;
+      font-weight: 700;
+      color: white;
+      text-transform: uppercase;
+      letter-spacing: 0.5px;
+    }
+
+    .feature-card {
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+    .feature-card:hover {
+      transform: translateY(-4px);
+      background: rgba(255, 255, 255, 0.08);
+      border-color: rgba(59, 130, 246, 0.3);
+    }
+
+    /* ============ WAVEFORM ============ */
+    .waveform {
+      display: flex;
+      align-items: center;
+      gap: 3px;
+      height: 30px;
+    }
+    .waveform-bar {
+      width: 3px;
+      background: #3b82f6;
+      border-radius: 2px;
+      animation: wave 0.8s ease-in-out infinite alternate;
+    }
+    .waveform-bar:nth-child(1) { height: 8px; animation-delay: 0s; }
+    .waveform-bar:nth-child(2) { height: 16px; animation-delay: 0.1s; }
+    .waveform-bar:nth-child(3) { height: 24px; animation-delay: 0.2s; }
+    .waveform-bar:nth-child(4) { height: 20px; animation-delay: 0.3s; }
+    .waveform-bar:nth-child(5) { height: 12px; animation-delay: 0.4s; }
+    .waveform-bar:nth-child(6) { height: 28px; animation-delay: 0.5s; }
+    .waveform-bar:nth-child(7) { height: 16px; animation-delay: 0.6s; }
+    .waveform-bar:nth-child(8) { height: 8px; animation-delay: 0.7s; }
+    @keyframes wave {
+      0% { transform: scaleY(0.3); }
+      100% { transform: scaleY(1); }
+    }
   </style>
 </head>
 <body>
 
-  <div id="root">
-    <!-- App renders here -->
-  </div>
-
-  <!-- Toast Container -->
+  <div id="root"></div>
   <div id="toast-container" class="fixed top-4 right-4 z-50 space-y-2 pointer-events-none"></div>
 
   <script>
@@ -188,13 +342,11 @@
     // CONFIGURATION
     // ========================================================================
     const CONFIG = {
-      // UPDATE THIS WITH YOUR RENDER BACKEND URL
       BACKEND_URL: 'https://my-javis.onrender.com',
-      // For local development: 'http://localhost:10000'
     };
 
     // ========================================================================
-    // MAIN APPLICATION
+    // JARVIS PRO APPLICATION
     // ========================================================================
     (function() {
       'use strict';
@@ -203,7 +355,7 @@
       const state = {
         user: null,
         token: localStorage.getItem('jarvis_token'),
-        currentPage: 'chat',
+        currentPage: 'dashboard',
         messages: [],
         isLoading: false,
         isRecording: false,
@@ -219,7 +371,11 @@
         adminStats: {},
         toolResult: '',
         toolLoading: false,
-        toolActive: 'chat'
+        toolActive: 'chat',
+        isConnected: false,
+        theme: 'dark',
+        sidebarOpen: true,
+        isMobile: window.innerWidth < 768
       };
 
       // ============ API ============
@@ -231,17 +387,11 @@
             'Content-Type': 'application/json',
             ...options.headers
           };
-
           if (state.token) {
             headers['Authorization'] = `Bearer ${state.token}`;
           }
-
           try {
-            const response = await fetch(`${this.base}${endpoint}`, {
-              ...options,
-              headers
-            });
-
+            const response = await fetch(`${this.base}${endpoint}`, { ...options, headers });
             if (response.status === 401) {
               localStorage.removeItem('jarvis_token');
               state.token = null;
@@ -249,7 +399,6 @@
               showToast('Session expired. Please login again.', 'error');
               throw new Error('Unauthorized');
             }
-
             const data = await response.json();
             if (!response.ok) throw new Error(data.error || 'Request failed');
             return data;
@@ -258,48 +407,48 @@
             throw new Error(error.message || 'Network error');
           }
         },
-
-        async get(endpoint) {
-          return this.request(endpoint, { method: 'GET' });
-        },
-
-        async post(endpoint, body) {
-          return this.request(endpoint, {
-            method: 'POST',
-            body: JSON.stringify(body)
-          });
-        },
-
-        async put(endpoint, body) {
-          return this.request(endpoint, {
-            method: 'PUT',
-            body: JSON.stringify(body)
-          });
-        },
-
-        async delete(endpoint) {
-          return this.request(endpoint, { method: 'DELETE' });
-        }
+        async get(endpoint) { return this.request(endpoint, { method: 'GET' }); },
+        async post(endpoint, body) { return this.request(endpoint, { method: 'POST', body: JSON.stringify(body) }); },
+        async put(endpoint, body) { return this.request(endpoint, { method: 'PUT', body: JSON.stringify(body) }); },
+        async delete(endpoint) { return this.request(endpoint, { method: 'DELETE' }); }
       };
+
+      // ============ CHECK CONNECTION ============
+      async function checkConnection() {
+        try {
+          const response = await fetch(`${API.base}/health`);
+          state.isConnected = response.ok;
+          updateStatusDots();
+        } catch {
+          state.isConnected = false;
+          updateStatusDots();
+        }
+      }
+
+      function updateStatusDots() {
+        document.querySelectorAll('.status-dot').forEach(dot => {
+          dot.className = `status-dot ${state.isConnected ? 'status-online' : 'status-offline'}`;
+        });
+        document.querySelectorAll('.status-text').forEach(el => {
+          el.textContent = state.isConnected ? 'Online' : 'Offline';
+        });
+      }
 
       // ============ RENDER ============
       function render() {
         const root = document.getElementById('root');
-
         if (!state.token) {
           root.innerHTML = renderAuth();
           bindAuthEvents();
+          checkConnection();
           return;
         }
-
         root.innerHTML = renderApp();
         bindAppEvents();
         loadData();
-
+        checkConnection();
         const chatInput = document.getElementById('chat-input');
-        if (chatInput && state.input) {
-          chatInput.value = state.input;
-        }
+        if (chatInput && state.input) chatInput.value = state.input;
       }
 
       // ============ AUTH PAGE ============
@@ -308,11 +457,21 @@
           <div class="min-h-screen flex items-center justify-center p-4" style="
             background: linear-gradient(135deg, #0a0a0f 0%, #1a1a2e 50%, #16213e 100%);
           ">
-            <div class="glass rounded-2xl p-8 w-full max-w-md">
+            <div class="fixed inset-0 overflow-hidden pointer-events-none">
+              <div class="absolute top-1/4 left-1/4 w-96 h-96 bg-blue-500/10 rounded-full blur-3xl"></div>
+              <div class="absolute bottom-1/4 right-1/4 w-96 h-96 bg-purple-500/10 rounded-full blur-3xl"></div>
+              <div class="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-64 h-64 bg-pink-500/5 rounded-full blur-3xl"></div>
+            </div>
+
+            <div class="glass rounded-2xl p-8 w-full max-w-md relative z-10 fade-in">
               <div class="text-center mb-8">
-                <div class="text-6xl mb-3 float">🤖</div>
-                <h1 class="text-4xl font-bold gradient-text">J.A.R.V.I.S.</h1>
-                <p class="text-gray-400 mt-2">Your AI Assistant</p>
+                <div class="text-5xl font-bold gradient-text neon-glow logo-float logo-pulse">J.A.R.V.I.S.</div>
+                <div class="text-sm text-gray-500 mt-1">PRO</div>
+                <p class="text-gray-400 mt-2">Premium AI Assistant</p>
+                <div class="flex items-center justify-center gap-2 mt-3">
+                  <span class="status-dot status-online" id="auth-status-dot"></span>
+                  <span class="text-xs text-gray-500 status-text" id="auth-status-text">Online</span>
+                </div>
               </div>
 
               <form id="auth-form" class="space-y-4">
@@ -336,8 +495,12 @@
                 <button id="auth-toggle" class="text-blue-400 hover:underline ml-2">Sign Up</button>
               </p>
 
-              <div class="mt-4 text-center text-xs text-gray-500">
-                Backend: ${CONFIG.BACKEND_URL}
+              <div class="mt-6 flex justify-center gap-4 text-xs text-gray-500">
+                <span>🔒 Secure</span>
+                <span>•</span>
+                <span>⚡ AI Powered</span>
+                <span>•</span>
+                <span>🌟 Premium</span>
               </div>
             </div>
           </div>
@@ -346,7 +509,6 @@
 
       function bindAuthEvents() {
         let isLogin = true;
-
         document.getElementById('auth-toggle')?.addEventListener('click', () => {
           isLogin = !isLogin;
           document.getElementById('auth-fields').style.display = isLogin ? 'none' : 'block';
@@ -363,11 +525,9 @@
           const email = document.getElementById('auth-email').value;
           const password = document.getElementById('auth-password').value;
           const username = document.getElementById('auth-username').value;
-
           const btn = document.getElementById('auth-submit');
           btn.disabled = true;
           btn.innerHTML = '<i class="fa-solid fa-spinner fa-spin"></i><span>Loading...</span>';
-
           try {
             const endpoint = isLogin ? '/auth/login' : '/auth/register';
             const body = isLogin ? { email, password } : { username, email, password };
@@ -395,12 +555,22 @@
             <div class="flex-1 overflow-hidden">
               <div class="glass px-6 py-3 flex items-center justify-between border-b border-white/5">
                 <div class="flex items-center gap-3">
-                  <h2 class="text-lg font-semibold text-white capitalize">${state.currentPage}</h2>
-                  <span class="text-xs text-gray-500 bg-white/5 px-2 py-0.5 rounded-full">v2.0</span>
+                  <button id="sidebar-toggle" class="md:hidden text-gray-400 hover:text-white transition">
+                    <i class="fa-solid fa-bars text-xl"></i>
+                  </button>
+                  <span class="text-lg font-bold gradient-text">J.A.R.V.I.S.</span>
+                  <span class="pro-badge">PRO</span>
+                  <span class="status-dot ${state.isConnected ? 'status-online' : 'status-offline'}" id="header-status-dot"></span>
                 </div>
-                <div class="flex items-center gap-3">
-                  <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
-                    ${state.user?.username?.charAt(0).toUpperCase() || 'U'}
+                <div class="flex items-center gap-4">
+                  <button id="notifications-btn" class="text-gray-400 hover:text-white transition relative">
+                    <i class="fa-regular fa-bell text-xl"></i>
+                  </button>
+                  <div class="flex items-center gap-2">
+                    <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                      ${state.user?.username?.charAt(0).toUpperCase() || 'U'}
+                    </div>
+                    <span class="text-sm text-gray-300 hidden md:block">${state.user?.username || 'User'}</span>
                   </div>
                 </div>
               </div>
@@ -410,6 +580,7 @@
                 ${state.currentPage === 'tools' ? renderTools() : ''}
                 ${state.currentPage === 'notes' ? renderNotes() : ''}
                 ${state.currentPage === 'tasks' ? renderTasks() : ''}
+                ${state.currentPage === 'files' ? renderFiles() : ''}
                 ${state.currentPage === 'settings' ? renderSettings() : ''}
                 ${state.currentPage === 'admin' ? renderAdmin() : ''}
               </div>
@@ -423,34 +594,45 @@
         const pages = [
           { id: 'dashboard', icon: 'fa-gauge-high', label: 'Dashboard' },
           { id: 'chat', icon: 'fa-comment-dots', label: 'Chat' },
-          { id: 'tools', icon: 'fa-wand-magic-sparkles', label: 'Tools' },
+          { id: 'tools', icon: 'fa-wand-magic-sparkles', label: 'AI Tools' },
           { id: 'notes', icon: 'fa-note-sticky', label: 'Notes' },
           { id: 'tasks', icon: 'fa-list-check', label: 'Tasks' },
+          { id: 'files', icon: 'fa-folder', label: 'Files' },
           { id: 'settings', icon: 'fa-gear', label: 'Settings' }
         ];
-
         if (state.user?.isAdmin) {
           pages.push({ id: 'admin', icon: 'fa-users-gear', label: 'Admin' });
         }
 
         return `
-          <div class="sidebar glass-dark w-20 md:w-64 flex flex-col border-r border-white/5">
+          <div class="sidebar glass-dark w-20 md:w-64 flex flex-col border-r border-white/5 transition-all duration-300">
             <div class="p-4 text-center border-b border-white/5">
-              <div class="text-2xl md:text-3xl font-bold gradient-text">JARVIS</div>
-              <div class="text-xs text-gray-500 hidden md:block">v2.0</div>
+              <div class="text-xl md:text-2xl font-bold gradient-text neon-glow">J.A.R.V.I.S.</div>
+              <div class="text-xs text-gray-500 hidden md:block">PRO v3.0</div>
             </div>
 
-            <nav class="flex-1 p-2 space-y-1 overflow-y-auto">
+            <nav class="flex-1 p-2 space-y-1 overflow-y-auto custom-scrollbar">
               ${pages.map(p => `
                 <div class="sidebar-item ${state.currentPage === p.id ? 'active' : ''}" data-page="${p.id}">
                   <i class="fa-solid ${p.icon} w-5 text-center"></i>
                   <span class="sidebar-label hidden md:inline">${p.label}</span>
+                  ${p.id === 'chat' ? `<span class="ml-auto text-xs text-gray-500 hidden md:block">${state.chats.length}</span>` : ''}
                 </div>
               `).join('')}
             </nav>
 
             <div class="p-4 border-t border-white/5">
-              <button id="logout-btn" class="w-full flex items-center gap-3 px-2 py-2 rounded-lg text-red-400 hover:bg-red-500/10 transition">
+              <div class="flex items-center gap-3 px-2 py-2">
+                <div class="w-8 h-8 rounded-full bg-gradient-to-r from-blue-500 to-purple-600 flex items-center justify-center text-white font-bold text-sm">
+                  ${state.user?.username?.charAt(0).toUpperCase() || 'U'}
+                </div>
+                <div class="hidden md:block flex-1">
+                  <div class="text-sm font-medium text-white truncate">${state.user?.username || 'User'}</div>
+                  <div class="text-xs text-gray-500 truncate">${state.user?.email || ''}</div>
+                </div>
+                <div class="hidden md:block text-xs text-gray-500">${state.user?.subscription === 'premium' ? '⭐' : '🆓'}</div>
+              </div>
+              <button id="logout-btn" class="w-full mt-2 flex items-center gap-3 px-2 py-2 rounded-lg text-red-400 hover:bg-red-500/10 transition">
                 <i class="fa-solid fa-right-from-bracket w-5 text-center"></i>
                 <span class="hidden md:inline">Logout</span>
               </button>
@@ -465,15 +647,25 @@
         const greeting = hour < 12 ? 'Morning' : hour < 18 ? 'Afternoon' : 'Evening';
 
         return `
-          <div class="h-full overflow-y-auto p-6">
+          <div class="h-full overflow-y-auto p-6 custom-scrollbar">
             <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
-              <div class="md:col-span-2 rounded-2xl p-8 relative overflow-hidden" style="
+              <div class="md:col-span-2 rounded-2xl p-8 relative overflow-hidden glow-pulse" style="
                 background: linear-gradient(135deg, #1a1a2e, #3b82f6);
               ">
                 <div class="absolute top-0 right-0 w-64 h-64 bg-white/5 rounded-full blur-3xl"></div>
+                <div class="absolute bottom-0 left-0 w-32 h-32 bg-purple-500/10 rounded-full blur-2xl"></div>
                 <div class="relative z-10">
-                  <h1 class="text-3xl font-bold text-white">Good ${greeting}, ${state.user?.username || 'User'}! 👋</h1>
-                  <p class="text-blue-200 mt-2">How can JARVIS assist you today?</p>
+                  <div class="flex items-center gap-2">
+                    <span class="text-2xl">👋</span>
+                    <h1 class="text-3xl font-bold text-white">Good ${greeting}, ${state.user?.username || 'User'}!</h1>
+                  </div>
+                  <p class="text-blue-200 mt-2">How can JARVIS PRO assist you today?</p>
+                  <div class="flex gap-2 mt-4 flex-wrap">
+                    <span class="px-3 py-1 bg-white/10 rounded-full text-xs text-white">💬 ${state.chats.length} chats</span>
+                    <span class="px-3 py-1 bg-white/10 rounded-full text-xs text-white">📝 ${state.notes.length} notes</span>
+                    <span class="px-3 py-1 bg-white/10 rounded-full text-xs text-white">✅ ${state.tasks.filter(t => !t.completed).length} tasks</span>
+                    <span class="px-3 py-1 bg-white/10 rounded-full text-xs text-white">📁 ${state.files.length} files</span>
+                  </div>
                 </div>
               </div>
 
@@ -482,30 +674,55 @@
                 <div class="text-gray-400">${state.date.toLocaleDateString('en-US', { weekday: 'long', month: 'long', day: 'numeric' })}</div>
                 ${state.weather ? `
                   <div class="mt-4 flex items-center gap-3">
-                    <img src="https://openweathermap.org/img/wn/${state.weather.icon}@2x.png" alt="weather" class="w-12 h-12" />
+                    <i class="fa-solid fa-cloud-sun text-yellow-400 text-3xl"></i>
                     <div>
-                      <div class="text-xl font-semibold text-white">${state.weather.temp}°C</div>
-                      <div class="text-gray-400 text-sm">${state.weather.description}</div>
+                      <div class="text-xl font-semibold text-white">${state.weather.temp || '--'}°C</div>
+                      <div class="text-gray-400 text-sm">${state.weather.description || 'Weather'}</div>
                     </div>
                   </div>
                 ` : `
-                  <div class="mt-4 text-gray-500">Loading weather...</div>
+                  <div class="mt-4 flex items-center gap-3">
+                    <div class="spinner w-8 h-8"></div>
+                    <div class="text-gray-500">Loading weather...</div>
+                  </div>
                 `}
               </div>
             </div>
 
             <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mt-6">
               ${[
-                { icon: 'fa-comment-dots', label: 'Chats', value: state.chats.length, color: 'text-blue-400' },
-                { icon: 'fa-list-check', label: 'Tasks', value: state.tasks.filter(t => !t.completed).length, color: 'text-green-400' },
-                { icon: 'fa-note-sticky', label: 'Notes', value: state.notes.length, color: 'text-yellow-400' }
+                { icon: 'fa-comment-dots', label: 'Total Chats', value: state.chats.length, color: 'text-blue-400' },
+                { icon: 'fa-list-check', label: 'Pending Tasks', value: state.tasks.filter(t => !t.completed).length, color: 'text-green-400' },
+                { icon: 'fa-note-sticky', label: 'Notes', value: state.notes.length, color: 'text-yellow-400' },
+                { icon: 'fa-folder', label: 'Files', value: state.files.length, color: 'text-purple-400' }
               ].map(stat => `
-                <div class="glass rounded-xl p-4">
+                <div class="glass rounded-xl p-4 feature-card hover:bg-white/5 transition">
                   <i class="fa-solid ${stat.icon} ${stat.color} text-xl"></i>
                   <div class="text-2xl font-bold text-white mt-2">${stat.value}</div>
                   <div class="text-gray-400 text-sm">${stat.label}</div>
                 </div>
               `).join('')}
+            </div>
+
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 mt-6">
+              <div class="glass rounded-xl p-4">
+                <h3 class="text-lg font-semibold text-white mb-3">⚡ Quick Actions</h3>
+                <div class="grid grid-cols-2 gap-2">
+                  <button class="quick-action px-3 py-2 glass rounded-lg text-sm text-gray-300 hover:text-white hover:bg-white/10 transition">💬 New Chat</button>
+                  <button class="quick-action px-3 py-2 glass rounded-lg text-sm text-gray-300 hover:text-white hover:bg-white/10 transition">📝 New Note</button>
+                  <button class="quick-action px-3 py-2 glass rounded-lg text-sm text-gray-300 hover:text-white hover:bg-white/10 transition">✅ New Task</button>
+                  <button class="quick-action px-3 py-2 glass rounded-lg text-sm text-gray-300 hover:text-white hover:bg-white/10 transition">📁 Upload File</button>
+                </div>
+              </div>
+              <div class="glass rounded-xl p-4">
+                <h3 class="text-lg font-semibold text-white mb-3">🤖 AI Status</h3>
+                <div class="flex items-center gap-3">
+                  <span class="status-dot ${state.isConnected ? 'status-online' : 'status-offline'}"></span>
+                  <span class="text-gray-400">${state.isConnected ? 'Connected to AI Server' : 'Disconnected'}</span>
+                </div>
+                <div class="mt-2 text-sm text-gray-500">Model: GPT-3.5 Turbo</div>
+                <div class="mt-1 text-sm text-gray-500">${state.chats.length} conversations today</div>
+              </div>
             </div>
           </div>
         `;
@@ -515,12 +732,19 @@
       function renderChat() {
         return `
           <div class="h-full flex flex-col">
-            <div class="flex-1 overflow-y-auto p-4 space-y-4" id="chat-messages">
+            <div class="flex-1 overflow-y-auto p-4 space-y-4 custom-scrollbar" id="chat-messages">
               ${state.messages.length === 0 ? `
                 <div class="h-full flex flex-col items-center justify-center text-center text-gray-500">
-                  <div class="text-6xl mb-4 float">🤖</div>
-                  <h2 class="text-2xl font-bold text-white">J.A.R.V.I.S. is ready</h2>
-                  <p class="mt-2">How can I help you today?</p>
+                  <div class="text-5xl font-bold gradient-text mb-4 logo-float">J.A.R.V.I.S.</div>
+                  <div class="text-sm text-gray-500 mb-2">PRO</div>
+                  <h2 class="text-2xl font-bold text-white">is ready to assist</h2>
+                  <p class="mt-2 text-gray-400">How can I help you today?</p>
+                  <div class="flex flex-wrap gap-2 mt-4 justify-center">
+                    <button class="quick-prompt px-4 py-2 glass rounded-full text-sm text-gray-300 hover:text-white hover:bg-white/10 transition">Write a poem</button>
+                    <button class="quick-prompt px-4 py-2 glass rounded-full text-sm text-gray-300 hover:text-white hover:bg-white/10 transition">Generate code</button>
+                    <button class="quick-prompt px-4 py-2 glass rounded-full text-sm text-gray-300 hover:text-white hover:bg-white/10 transition">Summarize text</button>
+                    <button class="quick-prompt px-4 py-2 glass rounded-full text-sm text-gray-300 hover:text-white hover:bg-white/10 transition">What's the weather?</button>
+                  </div>
                 </div>
               ` : state.messages.map((msg, i) => `
                 <div class="flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'} slide-in">
@@ -554,8 +778,14 @@
                 <button id="stop-btn" class="p-3 rounded-lg bg-red-500/20 text-red-400 hover:bg-red-500/30 transition">
                   <i class="fa-solid fa-stop"></i>
                 </button>
+                <button id="clear-chat" class="p-3 rounded-lg bg-gray-700/50 text-gray-400 hover:text-white hover:bg-gray-700 transition">
+                  <i class="fa-regular fa-trash-can"></i>
+                </button>
                 <input id="chat-input" type="text" placeholder="Type your message..."
                   class="flex-1 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition" />
+                <button id="voice-rec-btn" class="p-3 rounded-lg bg-purple-500/20 text-purple-400 hover:bg-purple-500/30 transition ${state.isRecording ? 'pulse-ring' : ''}">
+                  <i class="fa-solid fa-waveform"></i>
+                </button>
                 <button id="send-btn" class="p-3 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition disabled:opacity-50">
                   <i class="fa-solid fa-paper-plane"></i>
                 </button>
@@ -572,40 +802,58 @@
       // ============ TOOLS ============
       function renderTools() {
         const tools = [
-          { id: 'chat', icon: 'fa-comment', label: 'AI Chat' },
-          { id: 'code', icon: 'fa-code', label: 'Code Generator' },
-          { id: 'image', icon: 'fa-image', label: 'Image Generator' },
-          { id: 'summarize', icon: 'fa-file-lines', label: 'Summarizer' },
-          { id: 'translate', icon: 'fa-language', label: 'Translator' },
-          { id: 'grammar', icon: 'fa-spell-check', label: 'Grammar Fixer' }
+          { id: 'chat', icon: 'fa-comment', label: 'AI Chat', desc: 'Conversation' },
+          { id: 'code', icon: 'fa-code', label: 'Code Generator', desc: 'Generate code' },
+          { id: 'image', icon: 'fa-image', label: 'Image Generator', desc: 'Create images' },
+          { id: 'summarize', icon: 'fa-file-lines', label: 'Summarizer', desc: 'Summarize text' },
+          { id: 'translate', icon: 'fa-language', label: 'Translator', desc: 'Translate text' },
+          { id: 'grammar', icon: 'fa-spell-check', label: 'Grammar Fixer', desc: 'Fix grammar' },
+          { id: 'email', icon: 'fa-envelope', label: 'Email Writer', desc: 'Write emails' }
         ];
-
         const active = tools.find(t => t.id === state.toolActive) || tools[0];
 
         return `
           <div class="h-full flex">
-            <div class="w-48 border-r border-white/5 p-2 space-y-1 overflow-y-auto">
+            <div class="w-48 border-r border-white/5 p-2 space-y-1 overflow-y-auto custom-scrollbar">
               ${tools.map(t => `
-                <div class="sidebar-item ${state.toolActive === t.id ? 'active' : ''}" data-tool="${t.id}">
-                  <i class="fa-solid ${t.icon} w-4 text-center"></i>
-                  <span class="text-sm">${t.label}</span>
+                <div class="sidebar-item ${state.toolActive === t.id ? 'active' : ''} flex-col items-start px-3 py-2" data-tool="${t.id}">
+                  <div class="flex items-center gap-2 w-full">
+                    <i class="fa-solid ${t.icon} w-4 text-center"></i>
+                    <span class="text-sm">${t.label}</span>
+                  </div>
+                  <span class="text-xs text-gray-500 ml-6">${t.desc}</span>
                 </div>
               `).join('')}
             </div>
 
-            <div class="flex-1 p-6 overflow-y-auto">
-              <h3 class="text-xl font-semibold text-white mb-4">${active.label}</h3>
+            <div class="flex-1 p-6 overflow-y-auto custom-scrollbar">
+              <div class="flex items-center gap-3 mb-4">
+                <i class="fa-solid ${active.icon} text-blue-400 text-xl"></i>
+                <h3 class="text-xl font-semibold text-white">${active.label}</h3>
+                <span class="text-xs text-gray-500 bg-white/5 px-2 py-0.5 rounded-full">AI Tool</span>
+              </div>
 
-              <textarea id="tool-input" class="w-full h-32 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none resize-none"
+              <textarea id="tool-input" class="w-full h-32 px-4 py-3 rounded-lg bg-white/5 border border-white/10 text-white placeholder-gray-500 focus:border-blue-500 focus:outline-none transition resize-none"
                 placeholder="Enter your prompt..."></textarea>
 
-              <button id="tool-generate" class="mt-4 px-6 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition disabled:opacity-50">
-                ${state.toolLoading ? 'Processing...' : 'Generate'}
-              </button>
+              <div class="flex gap-3 mt-4">
+                <button id="tool-generate" class="px-6 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition disabled:opacity-50 flex items-center gap-2">
+                  ${state.toolLoading ? '<i class="fa-solid fa-spinner fa-spin"></i> Processing...' : '<i class="fa-solid fa-wand-magic-sparkles"></i> Generate'}
+                </button>
+                <button id="tool-clear" class="px-4 py-2 rounded-lg bg-gray-700 text-gray-400 hover:text-white hover:bg-gray-600 transition">
+                  <i class="fa-regular fa-trash-can"></i> Clear
+                </button>
+              </div>
 
               ${state.toolResult ? `
-                <div class="mt-6 p-4 rounded-lg glass">
-                  <div class="text-white markdown">${renderMarkdown(state.toolResult)}</div>
+                <div class="mt-6 p-4 rounded-lg glass fade-in">
+                  <div class="flex justify-between items-center mb-3">
+                    <span class="text-sm text-gray-400">Result</span>
+                    <button class="copy-btn px-3 py-1 rounded bg-white/10 text-white text-sm hover:bg-white/20 transition flex items-center gap-1">
+                      <i class="fa-regular fa-copy"></i> Copy
+                    </button>
+                  </div>
+                  <div class="text-white markdown max-h-96 overflow-y-auto custom-scrollbar">${renderMarkdown(state.toolResult)}</div>
                 </div>
               ` : ''}
             </div>
@@ -616,24 +864,42 @@
       // ============ NOTES ============
       function renderNotes() {
         return `
-          <div class="h-full overflow-y-auto p-6">
+          <div class="h-full overflow-y-auto p-6 custom-scrollbar">
             <div class="flex justify-between items-center mb-6">
-              <h2 class="text-2xl font-bold text-white">📝 Notes</h2>
+              <div>
+                <h2 class="text-2xl font-bold text-white">📝 Notes</h2>
+                <p class="text-gray-400 text-sm">${state.notes.length} notes total</p>
+              </div>
               <button id="add-note" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition flex items-center gap-2">
                 <i class="fa-solid fa-plus"></i> New Note
               </button>
             </div>
             <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               ${state.notes.map(note => `
-                <div class="glass rounded-lg p-4">
-                  <h4 class="text-white font-semibold">${note.title}</h4>
-                  <p class="text-gray-400 text-sm mt-2">${note.content || 'No content'}</p>
-                  <button class="text-gray-400 hover:text-red-400 transition text-sm mt-2 delete-note" data-id="${note._id}">
-                    <i class="fa-regular fa-trash-can"></i> Delete
-                  </button>
+                <div class="glass rounded-lg p-4 hover:bg-white/5 transition group">
+                  <div class="flex justify-between items-start">
+                    <h4 class="text-white font-semibold">${note.title}</h4>
+                    <div class="flex gap-2 opacity-0 group-hover:opacity-100 transition">
+                      <button class="text-gray-400 hover:text-red-400 transition delete-note" data-id="${note._id}">
+                        <i class="fa-regular fa-trash-can"></i>
+                      </button>
+                    </div>
+                  </div>
+                  <p class="text-gray-400 text-sm mt-2 line-clamp-3">${note.content || 'No content'}</p>
+                  <div class="flex justify-between items-center mt-3">
+                    <div class="flex gap-1">
+                      ${(note.tags || []).slice(0, 2).map(tag => `<span class="text-xs px-2 py-0.5 rounded-full bg-blue-500/20 text-blue-400">#${tag}</span>`).join('')}
+                    </div>
+                    <span class="text-gray-500 text-xs">${new Date(note.updatedAt || note.createdAt).toLocaleDateString()}</span>
+                  </div>
                 </div>
               `).join('')}
-              ${state.notes.length === 0 ? '<div class="col-span-full text-center py-12 text-gray-500">No notes yet</div>' : ''}
+              ${state.notes.length === 0 ? `
+                <div class="col-span-full text-center py-12 text-gray-500">
+                  <div class="text-4xl mb-3">📝</div>
+                  <p>No notes yet. Create your first note!</p>
+                </div>
+              ` : ''}
             </div>
           </div>
         `;
@@ -642,24 +908,31 @@
       // ============ TASKS ============
       function renderTasks() {
         const pending = state.tasks.filter(t => !t.completed);
+        const completed = state.tasks.filter(t => t.completed);
 
         return `
-          <div class="h-full overflow-y-auto p-6">
+          <div class="h-full overflow-y-auto p-6 custom-scrollbar">
             <div class="flex justify-between items-center mb-6">
-              <h2 class="text-2xl font-bold text-white">✅ Tasks</h2>
+              <div>
+                <h2 class="text-2xl font-bold text-white">✅ Tasks</h2>
+                <p class="text-gray-400 text-sm">${pending.length} pending · ${completed.length} completed</p>
+              </div>
               <button id="add-task" class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition flex items-center gap-2">
                 <i class="fa-solid fa-plus"></i> New Task
               </button>
             </div>
+
             <div class="space-y-2">
+              <h4 class="text-sm text-gray-500 font-medium">Pending</h4>
               ${pending.map(task => `
-                <div class="glass rounded-lg p-4 flex items-center gap-4">
+                <div class="glass rounded-lg p-4 flex items-center gap-4 hover:bg-white/5 transition">
                   <button class="toggle-task text-2xl" data-id="${task._id}">
                     <i class="fa-regular fa-circle-check text-gray-500 hover:text-green-400 transition"></i>
                   </button>
                   <div class="flex-1">
                     <div class="text-white">${task.title}</div>
                     ${task.description ? `<div class="text-gray-400 text-sm">${task.description}</div>` : ''}
+                    ${task.dueDate ? `<div class="text-gray-500 text-xs">📅 ${new Date(task.dueDate).toLocaleDateString()}</div>` : ''}
                   </div>
                   <button class="text-gray-400 hover:text-red-400 transition delete-task" data-id="${task._id}">
                     <i class="fa-regular fa-trash-can"></i>
@@ -667,6 +940,64 @@
                 </div>
               `).join('')}
               ${pending.length === 0 ? '<div class="text-gray-500 text-center py-4">No pending tasks 🎉</div>' : ''}
+
+              ${completed.length > 0 ? `
+                <h4 class="text-sm text-gray-500 font-medium mt-4">Completed</h4>
+                ${completed.map(task => `
+                  <div class="glass rounded-lg p-4 flex items-center gap-4 opacity-60 hover:opacity-100 transition">
+                    <button class="toggle-task text-2xl" data-id="${task._id}">
+                      <i class="fa-solid fa-circle-check text-green-400"></i>
+                    </button>
+                    <div class="flex-1">
+                      <div class="text-white line-through">${task.title}</div>
+                      ${task.description ? `<div class="text-gray-500 text-sm line-through">${task.description}</div>` : ''}
+                    </div>
+                    <button class="text-gray-400 hover:text-red-400 transition delete-task" data-id="${task._id}">
+                      <i class="fa-regular fa-trash-can"></i>
+                    </button>
+                  </div>
+                `).join('')}
+              ` : ''}
+            </div>
+          </div>
+        `;
+      }
+
+      // ============ FILES ============
+      function renderFiles() {
+        return `
+          <div class="h-full overflow-y-auto p-6 custom-scrollbar">
+            <div class="flex justify-between items-center mb-6">
+              <div>
+                <h2 class="text-2xl font-bold text-white">📁 Files</h2>
+                <p class="text-gray-400 text-sm">${state.files.length} files uploaded</p>
+              </div>
+              <label class="px-4 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition cursor-pointer flex items-center gap-2">
+                <i class="fa-solid fa-upload"></i> Upload
+                <input type="file" id="file-upload" class="hidden" multiple />
+              </label>
+            </div>
+            <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+              ${state.files.map(file => `
+                <div class="glass rounded-lg p-4 hover:bg-white/5 transition group">
+                  <div class="flex items-center gap-3">
+                    <i class="fa-solid fa-file text-blue-400 text-2xl"></i>
+                    <div class="flex-1">
+                      <div class="text-white text-sm truncate">${file.originalName}</div>
+                      <div class="text-gray-500 text-xs">${(file.size / 1024).toFixed(1)} KB</div>
+                    </div>
+                    <button class="text-gray-400 hover:text-red-400 transition delete-file" data-id="${file._id}">
+                      <i class="fa-regular fa-trash-can"></i>
+                    </button>
+                  </div>
+                </div>
+              `).join('')}
+              ${state.files.length === 0 ? `
+                <div class="col-span-full text-center py-12 text-gray-500">
+                  <div class="text-4xl mb-3">📁</div>
+                  <p>No files uploaded</p>
+                </div>
+              ` : ''}
             </div>
           </div>
         `;
@@ -675,7 +1006,7 @@
       // ============ SETTINGS ============
       function renderSettings() {
         return `
-          <div class="h-full overflow-y-auto p-6">
+          <div class="h-full overflow-y-auto p-6 custom-scrollbar">
             <h2 class="text-2xl font-bold text-white mb-6">⚙️ Settings</h2>
             <div class="max-w-2xl space-y-6">
               <div class="glass rounded-lg p-4">
@@ -687,17 +1018,54 @@
                   <div>
                     <div class="text-white font-medium">${state.user?.username}</div>
                     <div class="text-gray-400 text-sm">${state.user?.email}</div>
+                    <div class="text-xs text-gray-500">${state.user?.subscription === 'premium' ? '⭐ Premium' : '🆓 Free'}</div>
                   </div>
                 </div>
               </div>
 
               <div class="glass rounded-lg p-4">
-                <h3 class="text-white font-semibold mb-2">Backend</h3>
-                <div class="text-sm text-gray-400">${CONFIG.BACKEND_URL}</div>
+                <h3 class="text-white font-semibold mb-2">Theme</h3>
+                <div class="flex gap-2">
+                  <button class="theme-btn px-4 py-2 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30" data-theme="dark">
+                    <i class="fa-solid fa-moon mr-2"></i>Dark
+                  </button>
+                  <button class="theme-btn px-4 py-2 rounded-lg bg-gray-700 text-gray-400 border border-transparent" data-theme="light">
+                    <i class="fa-solid fa-sun mr-2"></i>Light
+                  </button>
+                </div>
+              </div>
+
+              <div class="glass rounded-lg p-4">
+                <h3 class="text-white font-semibold mb-2">Voice Settings</h3>
+                <select id="settings-voice" class="w-full px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-blue-500 focus:outline-none">
+                  <option value="alloy">Alloy</option>
+                  <option value="echo">Echo</option>
+                  <option value="fable">Fable</option>
+                  <option value="onyx">Onyx</option>
+                  <option value="nova">Nova</option>
+                  <option value="shimmer">Shimmer</option>
+                </select>
+                <div class="mt-2">
+                  <label class="text-gray-400 text-sm">Wake Word</label>
+                  <input type="text" id="settings-wake" value="Jarvis"
+                    class="w-full mt-1 px-3 py-2 rounded-lg bg-white/5 border border-white/10 text-white focus:border-blue-500 focus:outline-none" />
+                </div>
+              </div>
+
+              <div class="glass rounded-lg p-4">
+                <h3 class="text-white font-semibold mb-2">Connection</h3>
+                <div class="flex items-center gap-2">
+                  <span class="status-dot ${state.isConnected ? 'status-online' : 'status-offline'}"></span>
+                  <span class="text-sm text-gray-400">${state.isConnected ? 'Connected to server' : 'Disconnected'}</span>
+                </div>
                 <button id="test-connection" class="mt-2 px-4 py-1 rounded bg-blue-500/20 text-blue-400 text-sm hover:bg-blue-500/30 transition">
                   <i class="fa-solid fa-plug"></i> Test Connection
                 </button>
               </div>
+
+              <button id="save-settings" class="px-6 py-2 rounded-lg bg-blue-500 text-white hover:bg-blue-600 transition flex items-center gap-2">
+                <i class="fa-regular fa-floppy-disk"></i> Save Settings
+              </button>
             </div>
           </div>
         `;
@@ -706,47 +1074,53 @@
       // ============ ADMIN ============
       function renderAdmin() {
         return `
-          <div class="h-full overflow-y-auto p-6">
+          <div class="h-full overflow-y-auto p-6 custom-scrollbar">
             <h2 class="text-2xl font-bold text-white mb-6">🛡️ Admin Dashboard</h2>
-            <div class="grid grid-cols-4 gap-4 mb-6">
+            <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
               ${[
-                { label: 'Users', value: state.adminStats.totalUsers || 0, color: 'text-blue-400' },
-                { label: 'Chats', value: state.adminStats.totalChats || 0, color: 'text-green-400' },
-                { label: 'Notes', value: state.adminStats.totalNotes || 0, color: 'text-yellow-400' },
-                { label: 'Tasks', value: state.adminStats.totalTasks || 0, color: 'text-purple-400' }
+                { label: 'Users', value: state.adminStats.totalUsers || 0, icon: 'fa-users', color: 'text-blue-400' },
+                { label: 'Chats', value: state.adminStats.totalChats || 0, icon: 'fa-comments', color: 'text-green-400' },
+                { label: 'Notes', value: state.adminStats.totalNotes || 0, icon: 'fa-note-sticky', color: 'text-yellow-400' },
+                { label: 'Tasks', value: state.adminStats.totalTasks || 0, icon: 'fa-list-check', color: 'text-purple-400' }
               ].map(stat => `
                 <div class="glass rounded-lg p-4 text-center">
+                  <i class="fa-solid ${stat.icon} ${stat.color} text-2xl"></i>
                   <div class="text-2xl font-bold text-white">${stat.value}</div>
                   <div class="text-gray-400 text-sm">${stat.label}</div>
                 </div>
               `).join('')}
             </div>
             <div class="glass rounded-lg overflow-hidden">
-              <table class="w-full">
-                <thead class="bg-white/5">
-                  <tr>
-                    <th class="px-4 py-3 text-left text-gray-400 text-sm">User</th>
-                    <th class="px-4 py-3 text-left text-gray-400 text-sm">Email</th>
-                    <th class="px-4 py-3 text-left text-gray-400 text-sm">Chats</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  ${state.adminUsers.map(user => `
-                    <tr class="border-t border-white/5">
-                      <td class="px-4 py-3 text-white">${user.username}</td>
-                      <td class="px-4 py-3 text-gray-400 text-sm">${user.email}</td>
-                      <td class="px-4 py-3 text-gray-400">${user.usage?.chats || 0}</td>
+              <div class="overflow-x-auto">
+                <table class="w-full">
+                  <thead class="bg-white/5">
+                    <tr>
+                      <th class="px-4 py-3 text-left text-gray-400 text-sm">User</th>
+                      <th class="px-4 py-3 text-left text-gray-400 text-sm">Email</th>
+                      <th class="px-4 py-3 text-left text-gray-400 text-sm">Subscription</th>
+                      <th class="px-4 py-3 text-left text-gray-400 text-sm">Chats</th>
                     </tr>
-                  `).join('')}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    ${state.adminUsers.map(user => `
+                      <tr class="border-t border-white/5 hover:bg-white/5 transition">
+                        <td class="px-4 py-3 text-white">${user.username}</td>
+                        <td class="px-4 py-3 text-gray-400 text-sm">${user.email}</td>
+                        <td class="px-4 py-3">
+                          <span class="px-2 py-1 rounded text-xs ${user.subscription === 'premium' ? 'bg-yellow-500/20 text-yellow-400' : 'bg-gray-700 text-gray-400'}">${user.subscription || 'free'}</span>
+                        </td>
+                        <td class="px-4 py-3 text-gray-400">${user.usage?.chats || 0}</td>
+                      </tr>
+                    `).join('')}
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         `;
       }
 
       // ============ HELPERS ============
-
       function renderMarkdown(text) {
         if (!text) return '';
         let html = text;
@@ -775,24 +1149,22 @@
       function showToast(message, type = 'info') {
         const container = document.getElementById('toast-container');
         if (!container) return;
-
         const colors = {
           success: 'border-green-500 text-green-400 bg-green-500/10',
           error: 'border-red-500 text-red-400 bg-red-500/10',
-          info: 'border-blue-500 text-blue-400 bg-blue-500/10'
+          info: 'border-blue-500 text-blue-400 bg-blue-500/10',
+          warning: 'border-yellow-500 text-yellow-400 bg-yellow-500/10'
         };
-
         const icons = {
           success: 'fa-circle-check',
           error: 'fa-circle-xmark',
-          info: 'fa-circle-info'
+          info: 'fa-circle-info',
+          warning: 'fa-triangle-exclamation'
         };
-
         const toast = document.createElement('div');
         toast.className = `glass px-4 py-3 rounded-lg border-l-4 ${colors[type] || colors.info} toast pointer-events-auto flex items-center gap-3`;
         toast.innerHTML = `<i class="fa-solid ${icons[type] || icons.info}"></i><span>${message}</span>`;
         container.appendChild(toast);
-
         setTimeout(() => {
           toast.classList.add('toast-exit');
           setTimeout(() => toast.remove(), 300);
@@ -800,33 +1172,24 @@
       }
 
       // ============ CHAT FUNCTIONS ============
-
       async function sendChatMessage(text) {
         if (!text.trim() || state.isLoading) return;
-
         const userMessage = { role: 'user', content: text, timestamp: Date.now() };
         state.messages.push(userMessage);
         state.isLoading = true;
         render();
-
         try {
           const response = await API.post('/chat', {
             messages: state.messages.map(m => ({ role: m.role, content: m.content })),
             model: 'gpt-3.5-turbo'
           });
-
           state.messages.push({ role: 'assistant', content: response.content, timestamp: Date.now() });
-
-          if (state.voiceEnabled) {
-            speakText(response.content);
-          }
-
+          if (state.voiceEnabled) speakText(response.content);
           await loadChats();
         } catch (error) {
           state.messages.push({ role: 'assistant', content: `⚠️ Error: ${error.message}`, timestamp: Date.now() });
           showToast('Failed to get response', 'error');
         }
-
         state.isLoading = false;
         render();
         const end = document.getElementById('chat-end');
@@ -842,70 +1205,17 @@
       }
 
       // ============ DATA LOADERS ============
-
       async function loadData() {
-        try {
-          await Promise.all([loadChats(), loadNotes(), loadTasks(), loadWeather()]);
-        } catch (error) {
-          // Silently fail
-        }
+        try { await Promise.all([loadChats(), loadNotes(), loadTasks(), loadFiles(), loadWeather()]); } catch {}
       }
+      async function loadChats() { try { state.chats = await API.get('/chat/history'); } catch { state.chats = []; } }
+      async function loadNotes() { try { state.notes = await API.get('/notes'); } catch { state.notes = []; } }
+      async function loadTasks() { try { state.tasks = await API.get('/tasks'); } catch { state.tasks = []; } }
+      async function loadFiles() { try { state.files = await API.get('/files'); } catch { state.files = []; } }
+      async function loadWeather() { try { state.weather = await API.get('/weather?city=London'); } catch { state.weather = null; } }
+      async function loadAdmin() { try { const [users, stats] = await Promise.all([API.get('/admin/users'), API.get('/admin/stats')]); state.adminUsers = users; state.adminStats = stats; render(); } catch {} }
 
-      async function loadChats() {
-        try { state.chats = await API.get('/chat/history'); } catch (e) { state.chats = []; }
-      }
-
-      async function loadNotes() {
-        try { state.notes = await API.get('/notes'); } catch (e) { state.notes = []; }
-      }
-
-      async function loadTasks() {
-        try { state.tasks = await API.get('/tasks'); } catch (e) { state.tasks = []; }
-      }
-
-      async function loadWeather() {
-        try {
-          state.weather = await API.get('/weather?city=London');
-        } catch (e) {
-          state.weather = null;
-        }
-      }
-
-      async function loadAdmin() {
-        try {
-          const [users, stats] = await Promise.all([
-            API.get('/admin/users'),
-            API.get('/admin/stats')
-          ]);
-          state.adminUsers = users;
-          state.adminStats = stats;
-          render();
-        } catch (error) {
-          showToast('Failed to load admin data', 'error');
-        }
-      }
-
-      function testConnection() {
-        fetch(`${API.base}/health`)
-          .then(res => res.json())
-          .then(data => {
-            showToast(`✅ Backend connected! Status: ${data.status}`, 'success');
-          })
-          .catch(err => {
-            showToast(`❌ Connection failed: ${err.message}`, 'error');
-          });
-      }
-
-      // ============ CLOCK ============
-
-      function updateClock() {
-        state.date = new Date();
-        const clock = document.getElementById('clock');
-        if (clock) clock.textContent = state.date.toLocaleTimeString();
-      }
-
-      // ============ EVENT BINDINGS ============
-
+      // ============ BIND EVENTS ============
       function bindAppEvents() {
         // Sidebar navigation
         document.querySelectorAll('.sidebar-item[data-page]').forEach(el => {
@@ -925,6 +1235,21 @@
           });
         });
 
+        // Quick actions
+        document.querySelectorAll('.quick-action').forEach((el, index) => {
+          el.addEventListener('click', () => {
+            const actions = ['chat', 'notes', 'tasks', 'files'];
+            state.currentPage = actions[index] || 'chat';
+            render();
+          });
+        });
+
+        // Sidebar toggle
+        document.getElementById('sidebar-toggle')?.addEventListener('click', () => {
+          const sidebar = document.querySelector('.sidebar');
+          if (sidebar) { sidebar.classList.toggle('w-20'); sidebar.classList.toggle('w-64'); }
+        });
+
         // Logout
         document.getElementById('logout-btn')?.addEventListener('click', () => {
           if (confirm('Are you sure you want to logout?')) {
@@ -938,35 +1263,16 @@
         // Chat
         const sendBtn = document.getElementById('send-btn');
         const chatInput = document.getElementById('chat-input');
-
         if (sendBtn && chatInput) {
           const sendMessage = () => {
             const text = chatInput.value.trim();
-            if (text && !state.isLoading) {
-              chatInput.value = '';
-              state.input = '';
-              sendChatMessage(text);
-            }
+            if (text && !state.isLoading) { chatInput.value = ''; state.input = ''; sendChatMessage(text); }
           };
-
           sendBtn.addEventListener('click', sendMessage);
-          chatInput.addEventListener('keypress', (e) => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              sendMessage();
-            }
-          });
-          chatInput.addEventListener('input', (e) => {
-            state.input = e.target.value;
-          });
+          chatInput.addEventListener('keypress', (e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault();
+              sendMessage(); } });
+          chatInput.addEventListener('input', (e) => { state.input = e.target.value; });
         }
-
-        // Voice toggle
-        document.getElementById('voice-toggle')?.addEventListener('click', () => {
-          state.voiceEnabled = !state.voiceEnabled;
-          render();
-          showToast(state.voiceEnabled ? 'Voice output enabled' : 'Voice output disabled', 'info');
-        });
 
         // Stop button
         document.getElementById('stop-btn')?.addEventListener('click', () => {
@@ -975,45 +1281,58 @@
           showToast('Generation stopped', 'warning');
         });
 
+        // Clear chat
+        document.getElementById('clear-chat')?.addEventListener('click', () => {
+          if (state.messages.length === 0) return;
+          if (confirm('Clear all messages?')) { state.messages = []; render();
+            showToast('Chat cleared', 'info'); }
+        });
+
+        // Voice toggle
+        document.getElementById('voice-toggle')?.addEventListener('click', () => {
+          state.voiceEnabled = !state.voiceEnabled;
+          render();
+          showToast(state.voiceEnabled ? 'Voice output enabled' : 'Voice output disabled', 'info');
+        });
+
+        // Quick prompts
+        document.querySelectorAll('.quick-prompt').forEach(el => {
+          el.addEventListener('click', () => {
+            const text = el.textContent.trim();
+            const input = document.getElementById('chat-input');
+            if (input) { input.value = text;
+              sendChatMessage(text); }
+          });
+        });
+
         // Tools
         document.getElementById('tool-generate')?.addEventListener('click', async () => {
           const input = document.getElementById('tool-input');
           if (!input) return;
-
           state.toolLoading = true;
           state.toolResult = '';
           render();
-
           try {
-            const endpoints = {
-              'code': '/tools/generate-code',
-              'image': '/tools/generate-image',
-              'summarize': '/tools/summarize',
-              'translate': '/tools/translate',
-              'grammar': '/tools/fix-grammar'
-            };
-
+            const endpoints = { 'code': '/tools/generate-code', 'image': '/tools/generate-image',
+              'summarize': '/tools/summarize', 'translate': '/tools/translate', 'grammar': '/tools/fix-grammar',
+              'email': '/tools/email-writer' };
             const endpoint = endpoints[state.toolActive];
-            if (!endpoint) {
-              state.toolResult = 'Tool not available';
+            if (!endpoint) { state.toolResult = 'Tool not available';
               state.toolLoading = false;
-              render();
-              return;
-            }
-
-            const data = await API.post(endpoint, {
-              prompt: input.value,
-              targetLang: 'Spanish',
-              language: 'javascript',
-              text: input.value
-            });
-
-            state.toolResult = data.code || data.url || data.summary || data.translated || data.fixed || 'Done!';
-          } catch (error) {
-            state.toolResult = `Error: ${error.message}`;
-          }
-
+              render(); return; }
+            const data = await API.post(endpoint, { prompt: input.value, targetLang: 'Spanish', language: 'javascript',
+                text: input.value });
+            state.toolResult = data.code || data.url || data.summary || data.translated || data.fixed || data.email ||
+              'Done!';
+          } catch (error) { state.toolResult = `Error: ${error.message}`; }
           state.toolLoading = false;
+          render();
+        });
+
+        document.getElementById('tool-clear')?.addEventListener('click', () => {
+          const input = document.getElementById('tool-input');
+          if (input) input.value = '';
+          state.toolResult = '';
           render();
         });
 
@@ -1022,24 +1341,18 @@
           const title = prompt('Note title:');
           if (title) {
             const content = prompt('Note content:');
-            try {
-              await API.post('/notes', { title, content });
+            try { await API.post('/notes', { title, content });
               await loadNotes();
               render();
-              showToast('Note created!', 'success');
-            } catch (error) {
-              showToast('Failed to create note', 'error');
-            }
+              showToast('Note created!', 'success'); } catch { showToast('Failed to create note', 'error'); }
           }
         });
 
         document.querySelectorAll('.delete-note').forEach(btn => {
           btn.addEventListener('click', async () => {
-            if (confirm('Delete this note?')) {
-              await API.delete(`/notes/${btn.dataset.id}`);
+            if (confirm('Delete this note?')) { await API.delete(`/notes/${btn.dataset.id}`);
               await loadNotes();
-              render();
-            }
+              render(); }
           });
         });
 
@@ -1047,79 +1360,119 @@
         document.getElementById('add-task')?.addEventListener('click', async () => {
           const title = prompt('Task title:');
           if (title) {
-            try {
-              await API.post('/tasks', { title, completed: false });
+            try { await API.post('/tasks', { title, completed: false });
               await loadTasks();
               render();
-              showToast('Task added!', 'success');
-            } catch (error) {
-              showToast('Failed to add task', 'error');
-            }
+              showToast('Task added!', 'success'); } catch { showToast('Failed to add task', 'error'); }
           }
         });
 
         document.querySelectorAll('.toggle-task').forEach(btn => {
           btn.addEventListener('click', async () => {
             const task = state.tasks.find(t => t._id === btn.dataset.id);
-            if (task) {
-              await API.put(`/tasks/${task._id}`, { ...task, completed: !task.completed });
+            if (task) { await API.put(`/tasks/${task._id}`, { ...task, completed: !task.completed });
               await loadTasks();
-              render();
-            }
+              render(); }
           });
         });
 
         document.querySelectorAll('.delete-task').forEach(btn => {
           btn.addEventListener('click', async () => {
-            if (confirm('Delete this task?')) {
-              await API.delete(`/tasks/${btn.dataset.id}`);
+            if (confirm('Delete this task?')) { await API.delete(`/tasks/${btn.dataset.id}`);
               await loadTasks();
-              render();
-            }
+              render(); }
           });
         });
 
-        // Test Connection
-        document.getElementById('test-connection')?.addEventListener('click', testConnection);
+        // Files
+        document.getElementById('file-upload')?.addEventListener('change', async (e) => {
+          const files = e.target.files;
+          for (const file of files) {
+            try {
+              const formData = new FormData();
+              formData.append('file', file);
+              const response = await fetch(`${API.base}/files/upload`, {
+                method: 'POST',
+                headers: { 'Authorization': `Bearer ${state.token}` },
+                body: formData
+              });
+              if (response.ok) showToast(`Uploaded: ${file.name}`, 'success');
+              else showToast(`Failed to upload ${file.name}`, 'error');
+            } catch { showToast(`Failed to upload ${file.name}`, 'error'); }
+          }
+          await loadFiles();
+          render();
+        });
+
+        document.querySelectorAll('.delete-file').forEach(btn => {
+          btn.addEventListener('click', async () => {
+            if (confirm('Delete this file?')) { await API.delete(`/files/${btn.dataset.id}`);
+              await loadFiles();
+              render(); }
+          });
+        });
+
+        // Settings
+        document.getElementById('save-settings')?.addEventListener('click', async () => {
+          const voice = document.getElementById('settings-voice')?.value;
+          const wakeWord = document.getElementById('settings-wake')?.value;
+          try {
+            await API.put('/user/profile', { preferences: { ...state.user?.preferences, voice, wakeWord } });
+            showToast('Settings saved!', 'success');
+          } catch { showToast('Failed to save settings', 'error'); }
+        });
+
+        // Theme
+        document.querySelectorAll('.theme-btn').forEach(btn => {
+          btn.addEventListener('click', () => {
+            document.querySelectorAll('.theme-btn').forEach(b => {
+              b.className =
+                'theme-btn px-4 py-2 rounded-lg bg-gray-700 text-gray-400 border border-transparent';
+            });
+            btn.className = 'theme-btn px-4 py-2 rounded-lg bg-blue-500/20 text-blue-400 border border-blue-500/30';
+            state.theme = btn.dataset.theme;
+            showToast(`Theme changed to ${state.theme}`, 'info');
+          });
+        });
+
+        // Test connection
+        document.getElementById('test-connection')?.addEventListener('click', () => {
+          fetch(`${API.base}/health`).then(res => res.json()).then(data => {
+            showToast(`✅ Backend connected! Status: ${data.status}`, 'success');
+          }).catch(() => { showToast('❌ Connection failed', 'error'); });
+        });
+
+        // Notifications
+        document.getElementById('notifications-btn')?.addEventListener('click', () => {
+          showToast('No new notifications', 'info');
+        });
 
         // Keyboard shortcuts
         document.addEventListener('keydown', (e) => {
-          if (e.ctrlKey && e.key === 'k') {
-            e.preventDefault();
-            const input = document.getElementById('chat-input');
-            if (input) input.focus();
-          }
+          if (e.ctrlKey && e.key === 'k') { e.preventDefault(); const input = document.getElementById('chat-input'); if (
+              input) input.focus(); }
         });
       }
 
       // ============ INIT ============
-
-      // Check for existing session
       if (state.token) {
-        API.get('/user/profile')
-          .then(user => {
-            state.user = user;
-            render();
-            setInterval(updateClock, 1000);
-            loadData();
-          })
-          .catch(() => {
-            state.token = null;
-            localStorage.removeItem('jarvis_token');
-            render();
-          });
-      } else {
-        render();
-      }
+        API.get('/user/profile').then(user => {
+          state.user = user;
+          render();
+          setInterval(() => { state.date = new Date(); const clock = document.getElementById('clock'); if (clock) clock
+              .textContent = state.date.toLocaleTimeString(); }, 1000);
+          loadData();
+        }).catch(() => { state.token = null;
+          localStorage.removeItem('jarvis_token');
+          render(); });
+      } else { render(); }
 
-      // Expose for debugging
       window.__JARVIS = { state, API, render, sendChatMessage, showToast, CONFIG };
-
-      console.log('🤖 J.A.R.V.I.S. v2.0');
+      console.log('🤖 J.A.R.V.I.S. PRO v3.0');
       console.log(`📡 Backend: ${CONFIG.BACKEND_URL}`);
+      console.log('💡 Press Ctrl+K to focus chat');
 
     })();
   </script>
-
 </body>
   </html>
